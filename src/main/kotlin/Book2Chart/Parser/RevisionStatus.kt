@@ -2,11 +2,10 @@
 // Translated by CS2J (http://www.cs2j.com): 24.08.2018 23:51:08
 //
 
-package Book2Chart.Parser;
+package Book2Chart.Parser
 
 
-public enum RevisionStatus
-{
+enum class RevisionStatus {
     Unknown,
     Good,
     Improvable,
