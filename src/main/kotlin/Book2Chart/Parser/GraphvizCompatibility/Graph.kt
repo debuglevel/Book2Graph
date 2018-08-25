@@ -28,10 +28,6 @@ class Graph<T> {
         for (vertex in vertices)
         {
             s += "${vertex?.hashCode()}[label=\"${vertex.toString()}\"];\n"
-
-            edges
-                    .filter { e -> e.start == vertex }
-                    .forEach { e -> println("  ${e.end.toString()}") }
         }
 
         for(edge in edges)

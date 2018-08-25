@@ -304,7 +304,7 @@ class FodtParser {
             val exists = chapters.any { c -> c.title == sibling }
             if (exists == false) {
                 failed = true
-                Trace.TraceInformation("Chapter '" + sibling + "' by '" + chapter.title + "' referenced but does not exist.")
+                Trace.TraceInformation("Chapter '" + sibling + "' is referenced by '" + chapter.title + "' but does not exist.")
                 chapter.debugInformation.add(Pair<DebugInformationType, Any?>(DebugInformationType.MissingReference, sibling))
             }
 

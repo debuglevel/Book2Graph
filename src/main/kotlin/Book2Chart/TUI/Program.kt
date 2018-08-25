@@ -12,8 +12,14 @@ object Program {
         val parser = Book2Chart.Parser.FodtParser()
         var book = parser.parse("Book.fodt")
 
+
         var graph = GraphBuilder().createGraph(book.chapters)
+        println()
+
+        println("Generating graphviz.dot:")
+        println("===================================")
         println(graph.generateDot())
+        println("===================================")
 //        Console.ReadLine()
     }
 
