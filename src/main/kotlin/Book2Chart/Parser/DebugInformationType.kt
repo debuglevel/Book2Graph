@@ -1,9 +1,4 @@
-//
-// Translated by CS2J (http://www.cs2j.com): 24.08.2018 23:51:07
-//
-
 package Book2Chart.Parser
-
 
 enum class DebugInformationType {
     __dummyEnum__0,

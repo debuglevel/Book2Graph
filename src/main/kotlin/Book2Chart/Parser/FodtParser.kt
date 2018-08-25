@@ -1,17 +1,8 @@
-//
-// Translated by CS2J (http://www.cs2j.com): 24.08.2018 23:51:08
-//
-
 package Book2Chart.Parser
 
-import Book2Chart.Parser.Book
-import Book2Chart.Parser.Chapter
-import Book2Chart.Parser.DebugInformationType
-import Book2Chart.Parser.Paragraph
-import Book2Chart.Parser.RevisionStatus
-import Book2Chart.Parser.Style
-import Book2Chart.Parser.StyleType
-import CS2JNet.System.StringSupport
+import org.w3c.dom.Node
+import java.nio.file.Files
+import java.nio.file.Paths
 
 /**
  * Parses a Flat ODT file with specified styles and creates a book object
@@ -38,21 +29,21 @@ class FodtParser {
             if (styleType == StyleType.Title) {
                 lastChapter = currentChapter
                 currentChapter = Chapter()
-                book.chapters.Add(currentChapter)
+                book.chapters.add(currentChapter)
                 currentChapter.precedingChapter = lastChapter
                 lastChapter.succeedingChapter = currentChapter
                 currentChapter.title = paragraph.content
                 currentChapter.revisionStatus = this.getRevisionStatus(paragraph.style!!)
             } else if (styleType == StyleType.Successor) {
-                currentChapter.succeedingChapterReferences.Add(paragraph.content)
+                currentChapter.succeedingChapterReferences.add(paragraph.content)
             } else if (styleType == StyleType.Precessor) {
-                currentChapter.precedingChapterReferences.Add(paragraph.content)
+                currentChapter.precedingChapterReferences.add(paragraph.content)
             } else if (styleType == StyleType.Summary) {
-                currentChapter.summary.Add(paragraph.content)
+                currentChapter.summary.add(paragraph.content)
             } else if (styleType == StyleType.Comment) {
-                currentChapter.comment.Add(paragraph.content)
+                currentChapter.comment.add(paragraph.content)
             } else if (styleType == StyleType.Content) {
-                currentChapter.text.Add(paragraph.content)
+                currentChapter.text.add(paragraph.content)
             } else {
             }
         }
@@ -61,12 +52,12 @@ class FodtParser {
     }
 
     @Throws(Exception::class)
-    private fun getStyle(styles: IEnumerable<Style>, paragraph: Paragraph): Style? {
+    private fun getStyle(styles: List<Style>, paragraph: Paragraph): Style? {
+        //Trace.TraceInformation("getStyle: "+paragraph.styleName)
         val styleName = paragraph.styleName
-        val style = styles.FirstOrDefault(/* [UNSUPPORTED] to translate lambda expressions we need an explicit delegate type, try adding a cast "(s) => {
-            return StringSupport.equals(s.Name, styleName);
-        }" */)
-        return if (style.isBaseStyle!!) {
+        val style = styles.firstOrNull { s -> s.name == styleName }
+
+        return if (style?.isBaseStyle!!) {
             style
         } else {
             style.parentStyle
@@ -75,7 +66,7 @@ class FodtParser {
 
     @Throws(Exception::class)
     private fun getStyleType(styleName: String): StyleType {
-        return if (styleName.StartsWith("ZZTitel")) {
+        return if (styleName.startsWith("ZZTitel")) {
             StyleType.Title
         } else if (StringSupport.equals(styleName, "ZZEinordnungDanach")) {
             StyleType.Successor
@@ -88,55 +79,121 @@ class FodtParser {
         } else if (StringSupport.equals(styleName, "ZZInhalt")) {
             StyleType.Content
         } else {
+            //Trace.TraceWarning("unknown style name used: " + paragraph.StyleName);
+            //paragraph.DebugInformation.Add(new KeyValuePair<DebugInformationType, object>(DebugInformationType.UnknownStyle, paragraph.StyleName));
+
             StyleType.Unkown
         }
     }
 
-    //Trace.TraceWarning("unknown style name used: " + paragraph.StyleName);
-    //paragraph.DebugInformation.Add(new KeyValuePair<DebugInformationType, object>(DebugInformationType.UnknownStyle, paragraph.StyleName));
-    @Throws(Exception::class)
-    private fun getStyles(document: XElement): IEnumerable<Style> {
+    private fun getStyles(document: XElement): List<Style> {
         val styles = this.getAllStyles(document)
         this.assignAutomaticStyles(styles)
         this.assignBaseStyleTypes(styles)
         return styles
     }
 
-    @Throws(Exception::class)
-    private fun assignBaseStyleTypes(styles: IEnumerable<Style>) {
-        for (__dummyForeachVar1 in styles.Where(/* [UNSUPPORTED] to translate lambda expressions we need an explicit delegate type, try adding a cast "(s) => {
-            return s.IsBaseStyle;
-        }" */)) {
+    private fun assignBaseStyleTypes(styles: List<Style>) {
+        for (__dummyForeachVar1 in styles.filter { s -> s.isBaseStyle }) {
             val style = __dummyForeachVar1 as Style
             style.styleType = this.getStyleType(style.name)
         }
     }
 
     @Throws(Exception::class)
-    private fun getAllStyles(document: XElement): IEnumerable<Style> {
+    private fun getAllStyles(document: XElement): List<Style> {
         val nsOffice = "urn:oasis:names:tc:opendocument:xmlns:office:1.0"
         val nsStyle = "urn:oasis:names:tc:opendocument:xmlns:style:1.0"
-        /* [UNSUPPORTED] 'var' as type is unsupported "var" */ xmlDefinedStyles = document.Descendants(nsOffice + "styles").Descendants(nsStyle + "style")
-        /* [UNSUPPORTED] 'var' as type is unsupported "var" */ definedStyles
-        /* [UNSUPPORTED] 'var' as type is unsupported "var" */ xmlAutomaticStyles = document.Descendants(nsOffice + "automatic-styles").Descendants(nsStyle + "style")
-        /* [UNSUPPORTED] 'var' as type is unsupported "var" */ automaticStyles
-        /* [UNSUPPORTED] 'var' as type is unsupported "var" */ styles = definedStyles.Concat(automaticStyles)
-        return styles.ToList()
+        //var xmlDefinedStyles = document.Descendants(nsOffice + "styles").Descendants(nsStyle + "style")
+
+        var xmlDefinedStyles = mutableListOf<Node>()
+
+        var xmlStyles = document.Descendants(nsOffice, "styles") //.Descendants(nsOffice, "text").Descendants(nsText, "p")
+        for (xmlStyle in xmlStyles)
+        {
+            var styleNodes = XElement.toMutableList(xmlStyle.childNodes).filter {
+                x -> x.localName == "style"
+            }
+            xmlDefinedStyles.addAll(styleNodes)
+
+        }
+
+
+
+//        var definedStyles = listOf<Style>();
+//        throw NotImplementedError()
+
+        var definedStyles = xmlDefinedStyles.map {
+            x-> Style(x.attributes.getNamedItemNS("urn:oasis:names:tc:opendocument:xmlns:style:1.0", "name").textContent, true, null)
+        };
+
+//        var definedStyles = from item in xmlDefinedStyles
+//                select new Style
+//        {
+//            Name = item.Attribute(nsStyle + "name").Value,
+//            IsBaseStyle = true
+//        };
+
+
+//        var xmlAutomaticStyles = document.Descendants(nsOffice + "automatic-styles").Descendants(nsStyle + "style")
+
+//        var automaticStyles = listOf<Style>();
+//        throw NotImplementedError()
+
+
+        var xmlAtomaticStyles = mutableListOf<Node>()
+
+        xmlStyles = document.Descendants(nsOffice, "automatic-styles") //.Descendants(nsOffice, "text").Descendants(nsText, "p")
+        for (xmlStyle in xmlStyles)
+        {
+            var styleNodes = XElement.toMutableList(xmlStyle.childNodes).filter { x -> x.localName == "style" }
+            xmlAtomaticStyles.addAll(styleNodes)
+
+        }
+
+        var automaticStyles = xmlAtomaticStyles.map {
+            x-> Style(x.attributes.getNamedItemNS("urn:oasis:names:tc:opendocument:xmlns:style:1.0", "name").textContent,
+                false,
+                x.attributes.getNamedItem("style:parent-style-name")?.textContent
+                )
+        };
+
+//        var automaticStyles = from item in xmlAutomaticStyles
+//                select new Style
+//        {
+//            Name = item.Attribute(nsStyle + "name").Value,
+//            ParentStyleName = item.Attribute(nsStyle + "parent-style-name") != null ? item.Attribute(nsStyle + "parent-style-name").Value : null,
+//            IsBaseStyle = false
+//        };
+
+//        throw NotImplementedError()
+        //var styles = definedStyles.Concat(automaticStyles)
+        var styles = automaticStyles.union(definedStyles)
+
+        //var styles = (from item in xmlStyles
+        //              select new Style
+        //              {
+        //                  Name = item.Attribute(nsStyle + "name").Value,
+        //                  ParentStyleName = item.Attribute(nsStyle + "parent-style-name") != null ? item.Attribute(nsStyle + "parent-style-name").Value : null
+        //              }).Where(s => s.ParentStyleName != null);
+
+        return styles.toList()
     }
 
-    //var styles = (from item in xmlStyles
-    //              select new Style
-    //              {
-    //                  Name = item.Attribute(nsStyle + "name").Value,
-    //                  ParentStyleName = item.Attribute(nsStyle + "parent-style-name") != null ? item.Attribute(nsStyle + "parent-style-name").Value : null
-    //              }).Where(s => s.ParentStyleName != null);
-    @Throws(Exception::class)
-    private fun assignAutomaticStyles(styles: IEnumerable<Style>) {
-        for (__dummyForeachVar2 in styles) {
-            val style = __dummyForeachVar2 as Style
-            val parentStyle = styles.FirstOrDefault(/* [UNSUPPORTED] to translate lambda expressions we need an explicit delegate type, try adding a cast "(s) => {
-                return StringSupport.equals(s.Name, style.getParentStyleName()) && s.IsBaseStyle;
-            }" */)
+
+    private fun assignAutomaticStyles(styles: List<Style>)
+    {
+        for (style in styles)
+        {
+            if (style.parentStyleName == null)
+            {
+                continue
+            }
+
+            val parentStyle = styles.firstOrNull {
+                s -> StringSupport.equals(s.name, style.parentStyleName) && s.isBaseStyle;
+            }
+
             if (parentStyle != null) {
                 style.parentStyle = parentStyle
             } else {
@@ -145,7 +202,6 @@ class FodtParser {
         }
     }
 
-    @Throws(Exception::class)
     private fun getRevisionStatus(style: Style): RevisionStatus {
         val stylename = style.name
         if (StringSupport.equals(stylename, "ZZTitelGeprueft")) {
@@ -161,24 +217,49 @@ class FodtParser {
         return RevisionStatus.Unknown
     }
 
-    @Throws(Exception::class)
     private fun loadXML(filename: String): XElement {
-        val xmlWriter = XmlWriter.Create(StringWriter(), XmlWriterSettings())
-        val fileStream = FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
-        return XElement.Load(fileStream)
+        //val xmlWriter = XmlWriter.Create(StringWriter(), XmlWriterSettings())
+        val fileStream = Files.newInputStream(Paths.get(filename))
+        return XElement.load(fileStream)
     }
 
-    @Throws(Exception::class)
-    private fun getParagraphs(doc: XElement): IEnumerable<Paragraph> {
+    private fun getParagraphs(doc: XElement): List<Paragraph> {
         val nsOffice = "urn:oasis:names:tc:opendocument:xmlns:office:1.0"
         val nsText = "urn:oasis:names:tc:opendocument:xmlns:text:1.0"
-        /* [UNSUPPORTED] 'var' as type is unsupported "var" */ xmlParagraphs = doc.Descendants(nsOffice + "body").Descendants(nsOffice + "text").Descendants(nsText + "p")
-        /* [UNSUPPORTED] 'var' as type is unsupported "var" */ paragraphs
-        return paragraphs.ToList()
+
+        //var xmlParagraphs = doc.Descendants(nsOffice, "body").Descendants(nsOffice, "text").Descendants(nsText, "p")
+
+        val xmlParagraphs = mutableListOf<Node>()
+
+        var bodies = doc.Descendants(nsOffice, "body") //.Descendants(nsOffice, "text").Descendants(nsText, "p")
+        for (body in bodies)
+        {
+            var textNodes = XElement.toMutableList(body.childNodes).filter { x -> x.localName == "text" }
+
+            for (textNode in textNodes)
+            {
+                var pNodes = XElement.toMutableList(textNode.childNodes).filter { x -> x.localName == "p" }
+                xmlParagraphs.addAll(pNodes)
+            }
+        }
+
+        //var paragraphs = mutableListOf<Paragraph>()
+
+        var paragraphs = xmlParagraphs.map { x -> Paragraph(x.textContent, x.attributes.getNamedItem("text:style-name").textContent) }
+
+        //throw NotImplementedError()
+//        var paragraphs = from item in xmlParagraphs
+//                select new Paragraph()
+//        {
+//            Content = item.value,
+//            StyleName = item.attribute(nsText + "style-name").value
+//        };
+
+        return paragraphs.toList()
     }
 
     @Throws(Exception::class)
-    private fun checkChaptersErrors(chapters: IEnumerable<Chapter>) {
+    private fun checkChaptersErrors(chapters: List<Chapter>) {
         for (__dummyForeachVar3 in chapters) {
             val chapter = __dummyForeachVar3 as Chapter
             this.checkChapterErrors(chapters, chapter)
@@ -186,7 +267,7 @@ class FodtParser {
     }
 
     @Throws(Exception::class)
-    private fun checkChapterErrors(chapters: IEnumerable<Chapter>, chapter: Chapter) {
+    private fun checkChapterErrors(chapters: List<Chapter>, chapter: Chapter) {
         this.checkReferences(chapters, chapter)
         this.checkTitle(chapter)
         this.checkSummary(chapter)
@@ -194,12 +275,10 @@ class FodtParser {
 
     @Throws(Exception::class)
     private fun checkSummary(chapter: Chapter): Boolean? {
-        val success = chapter.summary.Any(/* [UNSUPPORTED] to translate lambda expressions we need an explicit delegate type, try adding a cast "(p) => {
-            return String.IsNullOrWhiteSpace(p) == false;
-        }" */)
+        val success = chapter.summary.any { s -> s.isBlank() == false }
         if (success == false) {
             Trace.TraceInformation("Chapter '" + chapter.title + "' has no summary")
-            chapter.debugInformation.Add(KeyValuePair<DebugInformationType, Any>(DebugInformationType.EmptySummary, null))
+            chapter.debugInformation.add(Pair<DebugInformationType, Any?>(DebugInformationType.EmptySummary, null))
         }
 
         return (!success)!!
@@ -207,9 +286,9 @@ class FodtParser {
 
     @Throws(Exception::class)
     private fun checkTitle(chapter: Chapter): Boolean {
-        if (String.IsNullOrWhiteSpace(chapter.title)) {
+        if (chapter.title.isBlank()) {
             Trace.TraceInformation("Chapter between '" + chapter.precedingChapter!!.title + "' and '" + chapter.succeedingChapter!!.title + "' has no name.")
-            chapter.debugInformation.Add(KeyValuePair<DebugInformationType, Any>(DebugInformationType.EmptyTitle, null))
+            chapter.debugInformation.add(Pair<DebugInformationType, Any?>(DebugInformationType.EmptyTitle, null))
             return false
         }
 
@@ -217,17 +296,16 @@ class FodtParser {
     }
 
     @Throws(Exception::class)
-    private fun checkReferences(chapters: IEnumerable<Chapter>, chapter: Chapter): Boolean? {
+    private fun checkReferences(chapters: List<Chapter>, chapter: Chapter): Boolean? {
         var failed = false
-        /* [UNSUPPORTED] 'var' as type is unsupported "var" */ sibling@ chapter.precedingChapterReferences.Concat(chapter.succeedingChapterReferences)
-        while (true) {
-            val exists = chapters.Any(/* [UNSUPPORTED] to translate lambda expressions we need an explicit delegate type, try adding a cast "(x) => {
-                return x.Title == sibling;
-            }" */)
+
+        for (sibling in chapter.precedingChapterReferences.union(chapter.succeedingChapterReferences))
+        {
+            val exists = chapters.any { c -> c.title == sibling }
             if (exists == false) {
                 failed = true
                 Trace.TraceInformation("Chapter '" + sibling + "' by '" + chapter.title + "' referenced but does not exist.")
-                chapter.debugInformation.Add(KeyValuePair<DebugInformationType, Any>(DebugInformationType.MissingReference, sibling))
+                chapter.debugInformation.add(Pair<DebugInformationType, Any?>(DebugInformationType.MissingReference, sibling))
             }
 
         }
