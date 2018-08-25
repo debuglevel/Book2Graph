@@ -18,6 +18,10 @@ class Chapter {
     val commentAsString = this.comment.joinToString("\n")
 
     val summaryAsString = this.summary.joinToString("\n")
+
+    override fun toString(): String {
+        return title
+    }
 }
 
 
