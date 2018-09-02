@@ -1,7 +1,7 @@
-package Book2Chart.Parser
+package de.debuglevel.book2graph.parser
 
-import Book2Chart.Parser.GraphvizCompatibility.Edge
-import Book2Chart.Parser.GraphvizCompatibility.Graph
+import de.debuglevel.book2graph.parser.graphvizCompatibility.Edge
+import de.debuglevel.book2graph.parser.graphvizCompatibility.Graph
 
 class GraphBuilder {
     fun createGraph(chapters: List<Chapter>): Graph<Chapter> {

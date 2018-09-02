@@ -2,11 +2,11 @@
 //// Translated by CS2J (http://www.cs2j.com): 24.08.2018 23:51:08
 ////
 //
-//package Book2Chart.GUI
+//package de.debuglevel.book2graph.gui
 //
-//import Book2Chart.Parser.Book
-//import Book2Chart.Parser.Chapter
-//import Book2Chart.Parser.GraphBuilder
+//import de.debuglevel.book2graph.parser.Book
+//import de.debuglevel.book2graph.parser.Chapter
+//import de.debuglevel.book2graph.parser.GraphBuilder
 //
 //
 ///**

@@ -1,16 +1,11 @@
-package Book2Chart.Parser
+package de.debuglevel.book2graph.parser
 
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
-import org.xml.sax.InputSource
 import java.io.InputStream
 import javax.xml.parsers.DocumentBuilderFactory
-import java.io.StringReader
-import javax.xml.parsers.DocumentBuilder
-
-
 
 
 class XElement {
@@ -41,7 +36,7 @@ class XElement {
 
 
             val dbFactory = DocumentBuilderFactory.newInstance()
-            dbFactory.setNamespaceAware(true);
+            dbFactory.isNamespaceAware = true
             val dBuilder = dbFactory.newDocumentBuilder()
             val doc = dBuilder.parse(inputStream)
 

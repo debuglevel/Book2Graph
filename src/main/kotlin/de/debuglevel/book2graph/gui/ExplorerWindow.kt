@@ -2,11 +2,11 @@
 //// Translated by CS2J (http://www.cs2j.com): 24.08.2018 23:51:08
 ////
 //
-//package Book2Chart.GUI
+//package de.debuglevel.book2graph.gui
 //
-//import Book2Chart.GUI.GraphWindow
-//import Book2Chart.Parser.Book
-//import Book2Chart.Parser.FodtParser
+//import de.debuglevel.book2graph.gui.GraphWindow
+//import de.debuglevel.book2graph.parser.Book
+//import de.debuglevel.book2graph.parser.FodtParser
 //
 //
 ///**
@@ -36,7 +36,7 @@
 //        if (result === true) {
 //            // Open document
 //            val filename = dlg.FileName
-//            val parser = Book2Chart.Parser.FodtParser()
+//            val parser = de.debuglevel.book2graph.parser.FodtParser()
 //            val book = parser.parse(filename)
 //            this.DataContext = book
 //        }

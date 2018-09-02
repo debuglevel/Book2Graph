@@ -1,6 +1,6 @@
-package Book2Chart.TUI
+package de.debuglevel.book2graph.tui
 
-import Book2Chart.Parser.GraphBuilder
+import de.debuglevel.book2graph.parser.GraphBuilder
 
 object Program {
     @JvmStatic
@@ -9,7 +9,7 @@ object Program {
     }
 
     internal fun Main(args: Array<String>) {
-        val parser = Book2Chart.Parser.FodtParser()
+        val parser = de.debuglevel.book2graph.parser.FodtParser()
         var book = parser.parse("Book.fodt")
 
 

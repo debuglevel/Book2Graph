@@ -1,4 +1,4 @@
-package Book2Chart.Parser
+package de.debuglevel.book2graph.parser
 
 import org.w3c.dom.Node
 import java.nio.file.Files
@@ -23,7 +23,7 @@ class FodtParser {
         var lastChapter = Chapter()
         var currentChapter = Chapter()
         for (__dummyForeachVar0 in paragraphs) {
-            val paragraph = __dummyForeachVar0 as Paragraph
+            val paragraph = __dummyForeachVar0
             paragraph.style = this.getStyle(styles, paragraph)
             val styleType = paragraph.style!!.styleType
             if (styleType == StyleType.Title) {
@@ -95,7 +95,7 @@ class FodtParser {
 
     private fun assignBaseStyleTypes(styles: List<Style>) {
         for (__dummyForeachVar1 in styles.filter { s -> s.isBaseStyle }) {
-            val style = __dummyForeachVar1 as Style
+            val style = __dummyForeachVar1
             style.styleType = this.getStyleType(style.name)
         }
     }
@@ -125,7 +125,7 @@ class FodtParser {
 
         var definedStyles = xmlDefinedStyles.map {
             x-> Style(x.attributes.getNamedItemNS("urn:oasis:names:tc:opendocument:xmlns:style:1.0", "name").textContent, true, null)
-        };
+        }
 
 //        var definedStyles = from item in xmlDefinedStyles
 //                select new Style
@@ -156,7 +156,7 @@ class FodtParser {
                 false,
                 x.attributes.getNamedItem("style:parent-style-name")?.textContent
                 )
-        };
+        }
 
 //        var automaticStyles = from item in xmlAutomaticStyles
 //                select new Style
@@ -190,8 +190,8 @@ class FodtParser {
                 continue
             }
 
-            val parentStyle = styles.firstOrNull {
-                s -> StringSupport.equals(s.name, style.parentStyleName) && s.isBaseStyle;
+            val parentStyle = styles.firstOrNull { s ->
+                StringSupport.equals(s.name, style.parentStyleName) && s.isBaseStyle
             }
 
             if (parentStyle != null) {
@@ -261,7 +261,7 @@ class FodtParser {
     @Throws(Exception::class)
     private fun checkChaptersErrors(chapters: List<Chapter>) {
         for (__dummyForeachVar3 in chapters) {
-            val chapter = __dummyForeachVar3 as Chapter
+            val chapter = __dummyForeachVar3
             this.checkChapterErrors(chapters, chapter)
         }
     }
@@ -281,7 +281,7 @@ class FodtParser {
             chapter.debugInformation.add(Pair<DebugInformationType, Any?>(DebugInformationType.EmptySummary, null))
         }
 
-        return (!success)!!
+        return (!success)
     }
 
     @Throws(Exception::class)

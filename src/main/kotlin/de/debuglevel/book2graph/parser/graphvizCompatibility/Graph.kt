@@ -1,4 +1,4 @@
-package Book2Chart.Parser.GraphvizCompatibility
+package de.debuglevel.book2graph.parser.graphvizCompatibility
 
 class Graph<T> {
     val vertices = mutableListOf<T>()
@@ -18,7 +18,7 @@ class Graph<T> {
             println(vertex.toString())
             edges
                     .filter { e -> e.start == vertex }
-                    .forEach { e -> println("  ${e.end.toString()}") }
+                    .forEach { e -> println("  ${e.end}") }
         }
     }
 
@@ -37,7 +37,7 @@ class Graph<T> {
 
         s += "}\n"
 
-        return s;
+        return s
     }
 
 }

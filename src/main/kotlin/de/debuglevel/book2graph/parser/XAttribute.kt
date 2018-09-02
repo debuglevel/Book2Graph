@@ -1,4 +1,4 @@
-package Book2Chart.Parser
+package de.debuglevel.book2graph.parser
 
 object XAttribute {
     fun value(): String
