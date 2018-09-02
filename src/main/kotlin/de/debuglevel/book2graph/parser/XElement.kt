@@ -7,75 +7,36 @@ import org.w3c.dom.NodeList
 import java.io.InputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
-
 class XElement {
-
     var doc: Document? = null
     var element: Element? = null
 
     companion object {
-        fun load(inputStream: InputStream): XElement
-        {
-
-//            val xml = ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-//                    + "<ns1:schema xmlns:ns1='http://example.com'>"
-//                    + "<ns1:tag1>"
-//                    + "<ns1:tag2>value</ns1:tag2>"
-//                    + "</ns1:tag1>"
-//                    + "</ns1:schema>")
-//
-//            val docBuilderFactory = DocumentBuilderFactory.newInstance()
-//            docBuilderFactory.isNamespaceAware = true
-//            val docBuilder = docBuilderFactory.newDocumentBuilder()
-//            val doc2 = docBuilder.parse(InputSource(StringReader(xml)))
-//
-//            val nl = doc2.getElementsByTagNameNS("http://example.com", "tag2")
-//            nl.length
-
-
-
-
+        fun load(inputStream: InputStream): XElement {
             val dbFactory = DocumentBuilderFactory.newInstance()
             dbFactory.isNamespaceAware = true
             val dBuilder = dbFactory.newDocumentBuilder()
             val doc = dBuilder.parse(inputStream)
 
-            var xelement = XElement()
+            val xelement = XElement()
             xelement.doc = doc
             xelement.element = doc.documentElement
-
-
 
             return xelement
         }
 
-        fun toMutableList(nodeliste: NodeList): MutableList<Node> {
-            var list = mutableListOf<Node>()
-            for (idx in 0..(nodeliste.length - 1)) {
-                list.add(nodeliste.item(idx))
+        fun toMutableList(nodelist: NodeList): MutableList<Node> {
+            val list = mutableListOf<Node>()
+            for (idx in 0..(nodelist.length - 1)) {
+                list.add(nodelist.item(idx))
             }
             return list
         }
     }
 
-    fun Descendants(namespace: String, elementName: String): List<Node> {
+    fun descendants(namespace: String, elementName: String): List<Node> {
+        val nodelist = this.element?.getElementsByTagNameNS(namespace, elementName)!!
 
-        var nodeliste = this.element?.getElementsByTagNameNS(namespace, elementName)!!
-
-        var list = toMutableList(nodeliste)
-
-        return list
-    }
-
-
-
-    fun value(): String
-    {
-        throw  NotImplementedError()
-    }
-
-    fun attribute(name: String): XAttribute
-    {
-        throw  NotImplementedError()
+        return toMutableList(nodelist)
     }
 }

@@ -1,9 +1,8 @@
 package de.debuglevel.book2graph.parser
 
 enum class DebugInformationType {
-    __dummyEnum__0,
     UnknownStyle,
-    UnknownPrecessor,
+    UnknownPredecessor,
     UnknownSuccessor,
     EmptySummary,
     EmptyTitle,

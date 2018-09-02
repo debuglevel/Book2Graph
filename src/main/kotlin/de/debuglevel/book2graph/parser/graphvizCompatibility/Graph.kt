@@ -1,20 +1,19 @@
 package de.debuglevel.book2graph.parser.graphvizCompatibility
 
-class Graph<T> {
-    val vertices = mutableListOf<T>()
-    val edges = mutableListOf<Edge<T>>()
+class Graph<T : Any> {
+    private val vertices = mutableListOf<T>()
+    private val edges = mutableListOf<Edge<T>>()
 
-    fun AddVertex(chapter: T) {
+    fun addVertex(chapter: T) {
         vertices.add(chapter)
     }
 
-    fun AddEdge(edge: Edge<T>) {
+    fun addEdge(edge: Edge<T>) {
         edges.add(edge)
     }
 
     fun print() {
-        for (vertex in vertices)
-        {
+        for (vertex in vertices) {
             println(vertex.toString())
             edges
                     .filter { e -> e.start == vertex }
@@ -25,13 +24,11 @@ class Graph<T> {
     fun generateDot(): String {
         var s = " digraph graphname {\n"
 
-        for (vertex in vertices)
-        {
-            s += "${vertex?.hashCode()}[label=\"${vertex.toString()}\"];\n"
+        for (vertex in vertices) {
+            s += "${vertex.hashCode()}[label=\"$vertex\"];\n"
         }
 
-        for(edge in edges)
-        {
+        for (edge in edges) {
             s += "${edge.start.hashCode()} -> ${edge.end.hashCode()};\n"
         }
 

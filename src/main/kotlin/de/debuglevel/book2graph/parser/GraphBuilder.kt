@@ -7,20 +7,20 @@ class GraphBuilder {
     fun createGraph(chapters: List<Chapter>): Graph<Chapter> {
         val graph = Graph<Chapter>()
         for (chapter in chapters) {
-            graph.AddVertex(chapter)
+            graph.addVertex(chapter)
         }
         for (chapter in chapters) {
             for (precedingChapterString in chapter.precedingChapterReferences) {
-                val preceedingChapter = this.findChapterByTitle(chapters, precedingChapterString)
-                if (preceedingChapter != null) {
-                    graph.AddEdge(Edge<Chapter>(preceedingChapter, chapter))
+                val precedingChapter = this.findChapterByTitle(chapters, precedingChapterString)
+                if (precedingChapter != null) {
+                    graph.addEdge(Edge(precedingChapter, chapter))
                 }
             }
 
             for (succeedingChapterString in chapter.succeedingChapterReferences) {
                 val succeedingChapter = this.findChapterByTitle(chapters, succeedingChapterString)
                 if (succeedingChapter != null) {
-                    graph.AddEdge(Edge<Chapter>(chapter, succeedingChapter))
+                    graph.addEdge(Edge<Chapter>(chapter, succeedingChapter))
                 }
             }
         }
@@ -30,7 +30,6 @@ class GraphBuilder {
     private fun findChapterByTitle(chapters: List<Chapter>, chapterTitle: String): Chapter? {
         return chapters.firstOrNull { c -> c.title == chapterTitle }
     }
-
 }
 
 

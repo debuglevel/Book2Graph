@@ -1,28 +1,25 @@
-package de.debuglevel.book2graph.tui
+package de.debuglevel.book2graph.cli
 
 import de.debuglevel.book2graph.parser.GraphBuilder
 
-object Program {
+object CLI {
     @JvmStatic
     fun main(args: Array<String>) {
-        Program.Main(args)
+        CLI.run()
     }
 
-    internal fun Main(args: Array<String>) {
+    private fun run() {
         val parser = de.debuglevel.book2graph.parser.FodtParser()
-        var book = parser.parse("Book.fodt")
+        val book = parser.parse("Book.fodt")
 
-
-        var graph = GraphBuilder().createGraph(book.chapters)
+        val graph = GraphBuilder().createGraph(book.chapters)
         println()
 
         println("Generating graphviz.dot:")
         println("===================================")
         println(graph.generateDot())
         println("===================================")
-//        Console.ReadLine()
     }
-
 }
 
 
