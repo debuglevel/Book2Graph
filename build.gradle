@@ -18,11 +18,14 @@ repositories {
 }
 
 // application plugin
-mainClassName = 'de.debuglevel.book2graph.cli.CLI'
+mainClassName = 'de.debuglevel.book2graph.cli.CliKt'
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     compile 'guru.nidi:graphviz-java:0.5.4'
+
+    // Clikt
+    compile 'com.github.ajalt:clikt:1.2.0'
 }
 
 // Adds the Main Class Attribute to the non-shadows jar.

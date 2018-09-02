@@ -1,6 +1,7 @@
 package de.debuglevel.book2graph.parser
 
 import org.w3c.dom.Node
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 
@@ -14,8 +15,8 @@ class FodtParser {
      * @param filename the path to the FODT file
      * @return a book object containing the FODT's information
      */
-    fun parse(filename: String): Book {
-        val document = this.loadXML(filename)
+    fun parse(file: File): Book {
+        val document = this.loadXML(file)
         val styles = this.getStyles(document)
         val paragraphs = this.getParagraphs(document)
 
@@ -155,9 +156,9 @@ class FodtParser {
 
     }
 
-    private fun loadXML(filename: String): XElement {
+    private fun loadXML(file: File): XElement {
         //val xmlWriter = XmlWriter.Create(StringWriter(), XmlWriterSettings())
-        val fileStream = Files.newInputStream(Paths.get(filename))
+        val fileStream = Files.newInputStream(file.toPath())
         return XElement.load(fileStream)
     }
 
