@@ -1,29 +1,48 @@
 package de.debuglevel.book2graph.parser
 
-import de.debuglevel.book2graph.parser.graphvizCompatibility.Edge
-import de.debuglevel.book2graph.parser.graphvizCompatibility.Graph
+import de.debuglevel.book2graph.parser.graphvizCompatibility.*
 
 class GraphBuilder {
     fun createGraph(chapters: List<Chapter>): Graph<Chapter> {
         val graph = Graph<Chapter>()
+
+        val chapterVertices = mutableListOf<Vertex<Chapter>>()
         for (chapter in chapters) {
-            graph.addVertex(chapter)
+            val color = when {
+                chapter.revisionStatus == RevisionStatus.Good -> Color.palegreen1
+                chapter.revisionStatus == RevisionStatus.Improvable -> Color.palevioletred1
+                chapter.revisionStatus == RevisionStatus.Unreviewed -> Color.palegoldenrod
+                chapter.revisionStatus == RevisionStatus.Milestone -> Color.skyblue1
+                chapter.revisionStatus == RevisionStatus.Unknown -> Color.gray92
+                else -> Color.gray92
+            }
+
+            val shape = when {
+                chapter.revisionStatus == RevisionStatus.Milestone -> Shape.rectangle
+                else -> Shape.ellipse
+            }
+
+            chapterVertices.add(graph.addVertex(chapter, color, shape))
         }
-        for (chapter in chapters) {
-            for (precedingChapterString in chapter.precedingChapterReferences) {
+
+        for (chapterVertex in chapterVertices) {
+            for (precedingChapterString in chapterVertex.vertex.precedingChapterReferences) {
                 val precedingChapter = this.findChapterByTitle(chapters, precedingChapterString)
-                if (precedingChapter != null) {
-                    graph.addEdge(Edge(precedingChapter, chapter))
+                val precedingChapterVertex = chapterVertices.firstOrNull { it.vertex == precedingChapter }
+                if (precedingChapterVertex != null) {
+                    graph.addEdge(Edge(precedingChapterVertex, chapterVertex))
                 }
             }
 
-            for (succeedingChapterString in chapter.succeedingChapterReferences) {
+            for (succeedingChapterString in chapterVertex.vertex.succeedingChapterReferences) {
                 val succeedingChapter = this.findChapterByTitle(chapters, succeedingChapterString)
-                if (succeedingChapter != null) {
-                    graph.addEdge(Edge<Chapter>(chapter, succeedingChapter))
+                val succeedingChapterVertex = chapterVertices.firstOrNull { it.vertex == succeedingChapter }
+                if (succeedingChapterVertex != null) {
+                    graph.addEdge(Edge(chapterVertex, succeedingChapterVertex))
                 }
             }
         }
+
         return graph
     }
 
