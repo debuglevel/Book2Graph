@@ -45,11 +45,41 @@ class GraphBuilder {
             }
         }
 
+        // TODO: pass option to CliKt to disable this behavior
+        for (edge in graph.edges.toList())
+        {
+            if (isSuperseded(edge, graph.edges))
+            {
+                println("Removed superseded edge: $edge")
+                graph.edges.remove(edge)
+            }
+        }
+
         return graph
     }
 
     private fun findChapterByTitle(chapters: List<Chapter>, chapterTitle: String): Chapter? {
         return chapters.firstOrNull { c -> c.title == chapterTitle }
+    }
+
+    private fun isSuperseded(edge: Edge<Vertex<Chapter>>, edges: List<Edge<Vertex<Chapter>>>): Boolean
+    {
+        return pathExists(edge.start, edge.end, edges.minus(edge))
+    }
+
+    private fun pathExists(start: Vertex<Chapter>, end: Vertex<Chapter>, edges: List<Edge<Vertex<Chapter>>>): Boolean
+    {
+        val descendants = getDescendants(start, edges)
+
+        return descendants.contains(end)
+    }
+
+    private fun getDescendants(start: Vertex<Chapter>, edges: List<Edge<Vertex<Chapter>>>): Set<Vertex<Chapter>>
+    {
+        val directDescendants = edges.filter { it.start == start }.map { it.end }
+        val recursiveDescendants = directDescendants.flatMap { getDescendants(it, edges) }
+
+        return directDescendants.union(recursiveDescendants)
     }
 }
 

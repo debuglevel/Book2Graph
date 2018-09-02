@@ -2,7 +2,7 @@ package de.debuglevel.book2graph.parser.graphvizCompatibility
 
 class Graph<T : Any> {
     private val vertices = mutableListOf<Vertex<T>>()
-    private val edges = mutableListOf<Edge<Vertex<T>>>()
+    val edges = mutableListOf<Edge<Vertex<T>>>()
 
     fun addVertex(obj: T, color: Color, shape: Shape, tooltip: String): Vertex<T> {
         val vertex = Vertex(obj, color, shape, tooltip)
