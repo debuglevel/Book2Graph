@@ -62,19 +62,19 @@ class GraphBuilder {
         return chapters.firstOrNull { c -> c.title == chapterTitle }
     }
 
-    private fun isSuperseded(edge: Edge<Vertex<Chapter>>, edges: List<Edge<Vertex<Chapter>>>): Boolean
+    private fun isSuperseded(edge: Edge<Vertex<Chapter>>, edges: Set<Edge<Vertex<Chapter>>>): Boolean
     {
         return pathExists(edge.start, edge.end, edges.minus(edge))
     }
 
-    private fun pathExists(start: Vertex<Chapter>, end: Vertex<Chapter>, edges: List<Edge<Vertex<Chapter>>>): Boolean
+    private fun pathExists(start: Vertex<Chapter>, end: Vertex<Chapter>, edges: Set<Edge<Vertex<Chapter>>>): Boolean
     {
         val descendants = getDescendants(start, edges)
 
         return descendants.contains(end)
     }
 
-    private fun getDescendants(start: Vertex<Chapter>, edges: List<Edge<Vertex<Chapter>>>): Set<Vertex<Chapter>>
+    private fun getDescendants(start: Vertex<Chapter>, edges: Set<Edge<Vertex<Chapter>>>): Set<Vertex<Chapter>>
     {
         val directDescendants = edges.filter { it.start == start }.map { it.end }
         val recursiveDescendants = directDescendants.flatMap { getDescendants(it, edges) }
