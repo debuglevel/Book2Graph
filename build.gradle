@@ -1,17 +1,38 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.2.50'
+    id 'java'
+    id "org.jetbrains.kotlin.jvm" version "1.2.50"
+
+    // creates scripts (.sh and .bat) to run the jar
+    id "application"
+
+    // task "shadowJar" is automatically triggered when plugin "application" is present
+    id 'com.github.johnrengelman.shadow' version '2.0.4'
+
 }
 
 group 'de.debuglevel.book2graph'
 version '0.0.1-SNAPSHOT'
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
+
+// application plugin
+mainClassName = 'de.debuglevel.book2graph.cli.CLI'
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     compile 'guru.nidi:graphviz-java:0.5.4'
+}
+
+// Adds the Main Class Attribute to the non-shadows jar.
+// In the shadowed jar, the Main Class Attribute is set via the mainClassName variable
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Book2Graph',
+                'Implementation-Version': version,
+                'Main-Class': mainClassName
+    }
 }
 
 compileKotlin {
