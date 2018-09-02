@@ -1,6 +1,9 @@
 package de.debuglevel.book2graph.cli
 
 import de.debuglevel.book2graph.parser.GraphBuilder
+import guru.nidi.graphviz.engine.Format
+import guru.nidi.graphviz.engine.Graphviz
+import java.io.File
 
 object CLI {
     @JvmStatic
@@ -17,8 +20,19 @@ object CLI {
 
         println("Generating graphviz.dot:")
         println("===================================")
-        println(graph.generateDot())
+        val dot = graph.generateDot()
+        println(dot)
         println("===================================")
+
+        println("Generating visualization of graph...")
+        visualizeGraph(dot)
+    }
+
+    private fun visualizeGraph(dot: String) {
+        val graph = guru.nidi.graphviz.parse.Parser.read(dot)
+        Graphviz.fromGraph(graph)
+                .render(Format.SVG)
+                .toFile(File("Book.svg"))
     }
 }
 
