@@ -4,8 +4,8 @@ class Graph<T : Any> {
     private val vertices = mutableListOf<Vertex<T>>()
     private val edges = mutableListOf<Edge<Vertex<T>>>()
 
-    fun addVertex(obj: T, color: Color, shape: Shape): Vertex<T> {
-        val vertex = Vertex(obj, color, shape)
+    fun addVertex(obj: T, color: Color, shape: Shape, tooltip: String): Vertex<T> {
+        val vertex = Vertex(obj, color, shape, tooltip)
         vertices.add(vertex)
 
         return vertex
@@ -28,7 +28,7 @@ class Graph<T : Any> {
         var s = " digraph graphname {\n"
 
         for (vertex in vertices) {
-            s += "${vertex.hashCode()}[label=\"$vertex\",fillcolor=${vertex.color},style=filled,shape=${vertex.shape}];\n"
+            s += "${vertex.hashCode()}[label=\"$vertex\",fillcolor=${vertex.color},style=filled,shape=${vertex.shape},tooltip=\"${vertex.tooltip}\"];\n"
         }
 
         for (edge in edges) {

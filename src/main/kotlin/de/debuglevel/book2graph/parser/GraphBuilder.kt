@@ -22,7 +22,9 @@ class GraphBuilder {
                 else -> Shape.ellipse
             }
 
-            chapterVertices.add(graph.addVertex(chapter, color, shape))
+            val tooltip = chapter.summaryAsString.replace("\n", "&#10;")
+
+            chapterVertices.add(graph.addVertex(chapter, color, shape, tooltip))
         }
 
         for (chapterVertex in chapterVertices) {

@@ -12,9 +12,14 @@ class Chapter {
     var debugInformation = mutableListOf<Pair<DebugInformationType, Any?>>()
     var revisionStatus = RevisionStatus.Unknown
 
-    val textAsString = this.text.joinToString("\n")
-    val commentAsString = this.comment.joinToString("\n")
-    val summaryAsString = this.summary.joinToString("\n")
+    val textAsString
+        get() = this.text.joinToString("\n")
+
+    val commentAsString
+        get() = this.comment.joinToString("\n")
+
+    val summaryAsString
+        get() = this.summary.joinToString("\n")
 
     override fun toString(): String {
         return title
