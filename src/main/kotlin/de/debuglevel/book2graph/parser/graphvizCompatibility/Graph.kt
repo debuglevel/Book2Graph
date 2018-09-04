@@ -2,7 +2,7 @@ package de.debuglevel.book2graph.parser.graphvizCompatibility
 
 class Graph<T : Any> {
     private val vertices = mutableSetOf<Vertex<T>>()
-    val edges = mutableSetOf<Edge<Vertex<T>>>()
+    private val edges = mutableSetOf<Edge<Vertex<T>>>()
 
     fun addVertex(obj: T, color: Color, shape: Shape, tooltip: String): Vertex<T> {
         val vertex = Vertex(obj, color, shape, tooltip)
@@ -13,6 +13,18 @@ class Graph<T : Any> {
 
     fun addEdge(edge: Edge<Vertex<T>>) {
         edges.add(edge)
+        edge.start.outEdges.add(edge)
+        edge.end.inEdges.add(edge)
+    }
+
+    fun removeEdge(edge: Edge<Vertex<T>>) {
+        edges.remove(edge)
+        edge.start.outEdges.remove(edge)
+        edge.end.inEdges.remove(edge)
+    }
+
+    fun getEdges(): Set<Edge<Vertex<T>>> {
+        return edges.toSet()
     }
 
     fun print() {

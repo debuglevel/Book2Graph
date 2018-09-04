@@ -1,6 +1,7 @@
 package de.debuglevel.book2graph.parser
 
 import de.debuglevel.book2graph.parser.graphvizCompatibility.*
+import kotlin.system.measureTimeMillis
 
 class GraphBuilder {
     fun createGraph(chapters: List<Chapter>): Graph<Chapter> {
@@ -46,14 +47,8 @@ class GraphBuilder {
         }
 
         // TODO: pass option to CliKt to disable this behavior
-        for (edge in graph.edges.toList())
-        {
-            if (isSuperseded(edge, graph.edges))
-            {
-                println("Removed superseded edge: $edge")
-                graph.edges.remove(edge)
-            }
-        }
+        val time = measureTimeMillis { transitiveReduction(graph) }
+        println("Removing superseded edges took $time ms")
 
         return graph
     }
@@ -62,24 +57,54 @@ class GraphBuilder {
         return chapters.firstOrNull { c -> c.title == chapterTitle }
     }
 
-    private fun isSuperseded(edge: Edge<Vertex<Chapter>>, edges: Set<Edge<Vertex<Chapter>>>): Boolean
-    {
-        return pathExists(edge.start, edge.end, edges.minus(edge))
+    /**
+     * Perform an transitive reduction on the graph. All edges which provide shortcuts by bypassing a vertex will be removed. A graph with as few edges as possible is the result.
+     * May stuck in a loop or throw an OverflowException if the graph is cyclic.
+     */
+    private fun transitiveReduction(graph: Graph<Chapter>) {
+        for (edge in graph.getEdges()) {
+            if (pathExists(edge.start, edge.end, edge)) {
+                graph.removeEdge(edge)
+                println("Removed superseded edge: $edge")
+            }
+        }
     }
 
-    private fun pathExists(start: Vertex<Chapter>, end: Vertex<Chapter>, edges: Set<Edge<Vertex<Chapter>>>): Boolean
+    private fun pathExists(start: Vertex<Chapter>, end: Vertex<Chapter>, ignoredEdge: Edge<Vertex<Chapter>>): Boolean
     {
-        val descendants = getDescendants(start, edges)
+        return findVertex(start, end, ignoredEdge)
 
-        return descendants.contains(end)
+        //val descendants = getDescendants(start, edges)
+
+        //return descendants.contains(end)
     }
 
-    private fun getDescendants(start: Vertex<Chapter>, edges: Set<Edge<Vertex<Chapter>>>): Set<Vertex<Chapter>>
-    {
-        val directDescendants = edges.filter { it.start == start }.map { it.end }
-        val recursiveDescendants = directDescendants.flatMap { getDescendants(it, edges) }
+    /**
+     * Walk tree (starting from "start") to find vertex "breakingCondition".
+     */
+    private fun findVertex(start: Vertex<Chapter>, breakingCondition: Vertex<Chapter>, ignoredEdge: Edge<Vertex<Chapter>>?): Boolean {
+        val descendants =
+                when {
+                    // only filter if ignoredEdge is not null (i.e. we are on the first level of the recursive tree). Saved about 50% time.
+                    ignoredEdge != null -> start.outEdges
+                            .filter { it !== ignoredEdge }
+                            .map { it.end }
+                    else -> start.outEdges
+                            .map { it.end }
+                }
 
-        return directDescendants.union(recursiveDescendants)
+        if (descendants.contains(breakingCondition)) {
+            return true
+        }
+
+        for (descendant in descendants) {
+            // ignoredEdge is replaced by null here, as it is only relevant in the first call level of the recursion
+            if (findVertex(descendant, breakingCondition, null)) {
+                return true
+            }
+        }
+
+        return false
     }
 }
 
