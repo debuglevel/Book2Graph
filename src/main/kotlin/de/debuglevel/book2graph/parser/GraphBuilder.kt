@@ -73,10 +73,6 @@ class GraphBuilder {
     private fun pathExists(start: Vertex<Chapter>, end: Vertex<Chapter>, ignoredEdge: Edge<Vertex<Chapter>>): Boolean
     {
         return findVertex(start, end, ignoredEdge)
-
-        //val descendants = getDescendants(start, edges)
-
-        //return descendants.contains(end)
     }
 
     /**
