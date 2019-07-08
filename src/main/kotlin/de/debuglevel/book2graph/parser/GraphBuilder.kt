@@ -7,7 +7,10 @@ import kotlin.system.measureTimeMillis
 class GraphBuilder {
     private val logger = KotlinLogging.logger {}
 
-    fun createGraph(chapters: List<Chapter>): Graph<Chapter> {
+    fun createGraph(
+        chapters: List<Chapter>,
+        transitiveReduction: Boolean
+    ): Graph<Chapter> {
         logger.debug { "Creating graph..." }
 
         val graph = Graph<Chapter>()
@@ -51,9 +54,10 @@ class GraphBuilder {
             }
         }
 
-        // TODO: pass option to CliKt to disable this behavior
-        val time = measureTimeMillis { transitiveReduction(graph) }
-        logger.debug { "Removing superseded edges took ${time}ms" }
+        if (transitiveReduction) {
+            val time = measureTimeMillis { transitiveReduction(graph) }
+            logger.debug { "Removing superseded edges took ${time}ms" }
+        }
 
         logger.debug { "Creating graph done." }
         return graph
