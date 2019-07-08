@@ -82,24 +82,27 @@ class GraphBuilder {
         }
     }
 
-    private fun pathExists(start: Vertex<Chapter>, end: Vertex<Chapter>, ignoredEdge: Edge<Vertex<Chapter>>): Boolean
-    {
+    private fun pathExists(start: Vertex<Chapter>, end: Vertex<Chapter>, ignoredEdge: Edge<Vertex<Chapter>>): Boolean {
         return findVertex(start, end, ignoredEdge)
     }
 
     /**
      * Walk tree (starting from "start") to find vertex "breakingCondition".
      */
-    private fun findVertex(start: Vertex<Chapter>, breakingCondition: Vertex<Chapter>, ignoredEdge: Edge<Vertex<Chapter>>?): Boolean {
+    private fun findVertex(
+        start: Vertex<Chapter>,
+        breakingCondition: Vertex<Chapter>,
+        ignoredEdge: Edge<Vertex<Chapter>>?
+    ): Boolean {
         val descendants =
-                when {
-                    // only filter if ignoredEdge is not null (i.e. we are on the first level of the recursive tree). Saved about 50% time.
-                    ignoredEdge != null -> start.outEdges
-                            .filter { it !== ignoredEdge }
-                            .map { it.end }
-                    else -> start.outEdges
-                            .map { it.end }
-                }
+            when {
+                // only filter if ignoredEdge is not null (i.e. we are on the first level of the recursive tree). Saved about 50% time.
+                ignoredEdge != null -> start.outEdges
+                    .filter { it !== ignoredEdge }
+                    .map { it.end }
+                else -> start.outEdges
+                    .map { it.end }
+            }
 
         if (descendants.contains(breakingCondition)) {
             return true

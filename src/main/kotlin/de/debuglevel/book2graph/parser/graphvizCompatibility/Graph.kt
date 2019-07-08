@@ -35,8 +35,8 @@ class Graph<T : Any> {
         for (vertex in vertices) {
             println(vertex.toString())
             edges
-                    .filter { e -> e.start == vertex }
-                    .forEach { e -> println("  ${e.end}") }
+                .filter { e -> e.start == vertex }
+                .forEach { e -> println("  ${e.end}") }
         }
     }
 

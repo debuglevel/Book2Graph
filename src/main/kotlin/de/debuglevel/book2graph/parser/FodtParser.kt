@@ -102,7 +102,8 @@ class FodtParser {
         val nsStyle = "urn:oasis:names:tc:opendocument:xmlns:style:1.0"
 
         val xmlDefinedStyles = mutableListOf<Node>()
-        var xmlStyles = document.descendants(nsOffice, "styles") //.descendants(nsOffice, "text").descendants(nsText, "p")
+        var xmlStyles =
+            document.descendants(nsOffice, "styles") //.descendants(nsOffice, "text").descendants(nsText, "p")
         for (xmlStyle in xmlStyles) {
             val styleNodes = XElement.toMutableList(xmlStyle.childNodes).filter { x ->
                 x.localName == "style"
@@ -111,20 +112,26 @@ class FodtParser {
 
         }
         val definedStyles = xmlDefinedStyles.map { x ->
-            Style(x.attributes.getNamedItemNS("urn:oasis:names:tc:opendocument:xmlns:style:1.0", "name").textContent, true, null)
+            Style(
+                x.attributes.getNamedItemNS("urn:oasis:names:tc:opendocument:xmlns:style:1.0", "name").textContent,
+                true,
+                null
+            )
         }
 
         val xmlAtomaticStyles = mutableListOf<Node>()
-        xmlStyles = document.descendants(nsOffice, "automatic-styles") //.descendants(nsOffice, "text").descendants(nsText, "p")
+        xmlStyles =
+            document.descendants(nsOffice, "automatic-styles") //.descendants(nsOffice, "text").descendants(nsText, "p")
         for (xmlStyle in xmlStyles) {
             val styleNodes = XElement.toMutableList(xmlStyle.childNodes).filter { x -> x.localName == "style" }
             xmlAtomaticStyles.addAll(styleNodes)
 
         }
         val automaticStyles = xmlAtomaticStyles.map { x ->
-            Style(x.attributes.getNamedItemNS("urn:oasis:names:tc:opendocument:xmlns:style:1.0", "name").textContent,
-                    false,
-                    x.attributes.getNamedItem("style:parent-style-name")?.textContent
+            Style(
+                x.attributes.getNamedItemNS("urn:oasis:names:tc:opendocument:xmlns:style:1.0", "name").textContent,
+                false,
+                x.attributes.getNamedItem("style:parent-style-name")?.textContent
             )
         }
 
@@ -189,7 +196,12 @@ class FodtParser {
             }
         }
 
-        val paragraphs = xmlParagraphs.map { x -> Paragraph(x.textContent, x.attributes.getNamedItem("text:style-name").textContent) }
+        val paragraphs = xmlParagraphs.map { x ->
+            Paragraph(
+                x.textContent,
+                x.attributes.getNamedItem("text:style-name").textContent
+            )
+        }
 
         return paragraphs.toList()
     }
@@ -236,7 +248,12 @@ class FodtParser {
             if (!exists) {
                 failed = true
                 logger.info("Chapter '" + sibling + "' is referenced by '" + chapter.title + "' but does not exist.")
-                chapter.debugInformation.add(Pair<DebugInformationType, Any?>(DebugInformationType.MissingReference, sibling))
+                chapter.debugInformation.add(
+                    Pair<DebugInformationType, Any?>(
+                        DebugInformationType.MissingReference,
+                        sibling
+                    )
+                )
             }
         }
 
