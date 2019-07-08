@@ -1,46 +1,118 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin"
+    }
+}
+
 plugins {
+    // Like --scan option to gradle; should be placed before any other plugins
+    id 'com.gradle.build-scan' version '2.1'
+
     id 'java'
-    id "org.jetbrains.kotlin.jvm" version "1.2.50"
+    id 'org.jetbrains.kotlin.jvm' version '1.3.21'
 
-    // creates scripts (.sh and .bat) to run the jar
-    id "application"
+    // Gradle dependency update checker; run by "dependencyUpdates" task
+    id "com.github.ben-manes.versions" version "0.20.0"
 
-    // task "shadowJar" is automatically triggered when plugin "application" is present
-    id 'com.github.johnrengelman.shadow' version '2.0.4'
+    // Release version with "gradle release"
+    id 'net.researchgate.release' version '2.6.0'
 
+    // Create start scripts
+    // Is executed on "build" task but not on e.g. "jar" task
+    id 'application'
+
+    // Bundle all dependencies into one fat shadowed jar
+    // (Gets automatically triggered when application plugin is present)
+    id 'com.github.johnrengelman.shadow' version '4.0.4'
 }
 
 group 'de.debuglevel.book2graph'
-version '0.0.1-SNAPSHOT'
+
+// application plugin configuration
+applicationName = "Book2Graph"
+mainClassName = 'de.debuglevel.book2graph.cli.CliKt'
 
 repositories {
     jcenter()
 }
 
-// application plugin
-mainClassName = 'de.debuglevel.book2graph.cli.CliKt'
-
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    compile 'guru.nidi:graphviz-java:0.5.4'
+    // Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    //implementation "org.jetbrains.kotlin:kotlin-reflect"
+
+    // Tests
+    testCompile 'org.junit.jupiter:junit-jupiter-api:5.4.0'
+    testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.4.0'
+    testCompile 'org.junit.jupiter:junit-jupiter-params:5.4.0'
+    testCompile 'org.assertj:assertj-core:3.12.0'
+
+    // Logging
+    // See http://saltnlight5.blogspot.com/2013/08/how-to-configure-slf4j-with-different.html for a quick introduction to slf4j
+    implementation 'io.github.microutils:kotlin-logging:1.6.25'
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+    implementation 'org.slf4j:slf4j-simple:1.7.25'
+
+    // Configuration
+    implementation "com.natpryce:konfig:1.6.10.0"
+
+    // GraphViz
+    implementation 'guru.nidi:graphviz-java:0.5.4'
 
     // Clikt
-    compile 'com.github.ajalt:clikt:1.2.0'
+    implementation 'com.github.ajalt:clikt:1.2.0'
 }
 
-// Adds the Main Class Attribute to the non-shadows jar.
-// In the shadowed jar, the Main Class Attribute is set via the mainClassName variable
+// Java configuration
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8 // Source is Java 8 code
+    targetCompatibility = JavaVersion.VERSION_1_8 // Byte code will be JVM 8
+}
+
+// Kotlin configuration (implies compileKotlin and compileTestKotlin)
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8 // Byte code will be JVM 8
+    }
+}
+
+// jar configuration
 jar {
+    // add Manifest to jar
     manifest {
-        attributes 'Implementation-Title': 'Book2Graph',
+        attributes 'Implementation-Title': applicationName,
                 'Implementation-Version': version,
                 'Main-Class': mainClassName
     }
 }
 
-compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+// Configuration of com.gradle.build-scan plugin
+buildScan {
+    // Accept the license agreement for com.gradle.build-scan plugin
+    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+    termsOfServiceAgree = 'yes'
+
+    // Always publish scan (no more need for --scan option)
+    publishAlways()
 }
-compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+
+// Configuration of net.researchgate.release plugin
+release {
+    failOnCommitNeeded = false
+    failOnUnversionedFiles = false
+}
+
+test {
+    useJUnitPlatform()
+
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+
+    reports {
+        html.enabled = true
+    }
 }
