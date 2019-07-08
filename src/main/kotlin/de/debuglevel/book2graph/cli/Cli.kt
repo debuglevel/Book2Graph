@@ -6,19 +6,31 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import de.debuglevel.book2graph.parser.GraphBuilder
+import de.debuglevel.book2graph.visualizer.GraphVisualizer
 import guru.nidi.graphviz.engine.Format
-import guru.nidi.graphviz.engine.Graphviz
 import mu.KotlinLogging
 import java.io.File
 
 class Cli : CliktCommand() {
     private val logger = KotlinLogging.logger {}
 
-    private val fodtFile: File by option(help = "file name of FODT file").file(
+    private val fodtFile: File by option(
+        "--inputFile",
+        "-i",
+        help = "file name of input FODT file"
+    ).file(
         exists = true,
         folderOkay = false,
         readable = true
     ).default(File("Book.fodt"))
+
+    private val svgFile: File by option(
+        "--outputFile",
+        "-o",
+        help = "file name of output SVG file"
+    ).file(
+        folderOkay = false
+    ).default(File("Book.svg"))
 
     private val transitiveReduction: Boolean by option(
         "--reduce",
@@ -42,18 +54,7 @@ class Cli : CliktCommand() {
                     "==================================="
         }
 
-        visualizeGraph(dot)
-    }
-
-    private fun visualizeGraph(dot: String) {
-        logger.debug { "Generating graph visualization..." }
-
-        val graph = guru.nidi.graphviz.parse.Parser.read(dot)
-        Graphviz.fromGraph(graph)
-            .render(Format.SVG)
-            .toFile(File("Book.svg"))
-
-        logger.debug { "Generating graph visualization done." }
+        GraphVisualizer().render(dot, svgFile, Format.SVG)
     }
 }
 
