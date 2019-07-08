@@ -24,8 +24,7 @@ class Cli : CliktCommand() {
         "--reduce",
         "-r",
         help = "perfom a transitive reduction on graph"
-    )
-        .flag(default = false)
+    ).flag(default = false)
 
     override fun run() {
         logger.info { "Starting Book2Graph..." }
