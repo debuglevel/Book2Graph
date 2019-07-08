@@ -5,7 +5,7 @@ enum class RevisionStatus {
     Unknown,
     Good,
     Improvable,
-    Unreviewed,
+    NotReviewed,
     Milestone
 }
 

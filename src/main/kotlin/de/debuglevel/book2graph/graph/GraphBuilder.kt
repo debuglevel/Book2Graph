@@ -21,7 +21,7 @@ object GraphBuilder {
             val color = when {
                 chapter.revisionStatus == RevisionStatus.Good -> Color.Green
                 chapter.revisionStatus == RevisionStatus.Improvable -> Color.Red
-                chapter.revisionStatus == RevisionStatus.Unreviewed -> Color.Yellow
+                chapter.revisionStatus == RevisionStatus.NotReviewed -> Color.Yellow
                 chapter.revisionStatus == RevisionStatus.Milestone -> Color.Blue
                 chapter.revisionStatus == RevisionStatus.Unknown -> Color.Gray
                 else -> Color.Gray

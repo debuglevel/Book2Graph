@@ -42,7 +42,7 @@ object FodtParser {
                     currentChapter.revisionStatus = this.getRevisionStatus(paragraph.style!!)
                 }
                 StyleType.Successor -> currentChapter.succeedingChapterReferences.add(paragraph.content)
-                StyleType.Precessor -> currentChapter.precedingChapterReferences.add(paragraph.content)
+                StyleType.Predecessor -> currentChapter.precedingChapterReferences.add(paragraph.content)
                 StyleType.Summary -> currentChapter.summary.add(paragraph.content)
                 StyleType.Comment -> currentChapter.comment.add(paragraph.content)
                 StyleType.Content -> currentChapter.text.add(paragraph.content)
@@ -71,14 +71,14 @@ object FodtParser {
     private fun getStyleType(styleName: String): StyleType {
         return when {
             styleName.startsWith("ZZTitel") -> StyleType.Title
-            StringSupport.equals(styleName, "ZZEinordnungDanach") -> StyleType.Successor
-            StringSupport.equals(styleName, "ZZEinordnungVorher") -> StyleType.Precessor
-            StringSupport.equals(styleName, "ZZZusammenfassung") -> StyleType.Summary
-            StringSupport.equals(styleName, "ZZKommentar") -> StyleType.Comment
-            StringSupport.equals(styleName, "ZZInhalt") -> StyleType.Content
+            styleName == "ZZEinordnungDanach" -> StyleType.Successor
+            styleName == "ZZEinordnungVorher" -> StyleType.Predecessor
+            styleName == "ZZZusammenfassung" -> StyleType.Summary
+            styleName == "ZZKommentar" -> StyleType.Comment
+            styleName == "ZZInhalt" -> StyleType.Content
             else -> //Trace.traceWarning("unknown style name used: " + paragraph.StyleName);
                 //paragraph.DebugInformation.Add(new KeyValuePair<DebugInformationType, object>(DebugInformationType.UnknownStyle, paragraph.StyleName));
-                StyleType.Unkown
+                StyleType.Unknown
         }
     }
 
@@ -147,7 +147,7 @@ object FodtParser {
             }
 
             val parentStyle = styles.firstOrNull { s ->
-                StringSupport.equals(s.name, style.parentStyleName) && s.isBaseStyle
+                s.name == style.parentStyleName && s.isBaseStyle
             }
 
             if (parentStyle != null) {
@@ -161,13 +161,12 @@ object FodtParser {
     private fun getRevisionStatus(style: Style): RevisionStatus {
         val styleName = style.name
         return when {
-            StringSupport.equals(styleName, "ZZTitelGeprueft") -> RevisionStatus.Good
-            StringSupport.equals(styleName, "ZZTitelVerbesserungsbeduerftig") -> RevisionStatus.Improvable
-            StringSupport.equals(styleName, "ZZTitelUngeprueft") -> RevisionStatus.Unreviewed
-            StringSupport.equals(styleName, "ZZTitelMeilenstein") -> RevisionStatus.Milestone
+            styleName == "ZZTitelGeprueft" -> RevisionStatus.Good
+            styleName == "ZZTitelVerbesserungsbeduerftig" -> RevisionStatus.Improvable
+            styleName == "ZZTitelUngeprueft" -> RevisionStatus.NotReviewed
+            styleName == "ZZTitelMeilenstein" -> RevisionStatus.Milestone
             else -> RevisionStatus.Unknown
         }
-
     }
 
     private fun loadXML(file: File): XElement {
