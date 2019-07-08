@@ -34,7 +34,6 @@ class Cli : CliktCommand() {
         val book = parser.parse(fodtFile)
 
         val graph = GraphBuilder().createGraph(book.chapters, transitiveReduction)
-        println()
 
         val dot = graph.generateDot()
         logger.debug {
