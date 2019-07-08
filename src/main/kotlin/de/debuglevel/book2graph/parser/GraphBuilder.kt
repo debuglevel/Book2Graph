@@ -1,10 +1,15 @@
 package de.debuglevel.book2graph.parser
 
 import de.debuglevel.book2graph.parser.graphvizCompatibility.*
+import mu.KotlinLogging
 import kotlin.system.measureTimeMillis
 
 class GraphBuilder {
+    private val logger = KotlinLogging.logger {}
+
     fun createGraph(chapters: List<Chapter>): Graph<Chapter> {
+        logger.debug { "Creating graph..." }
+
         val graph = Graph<Chapter>()
 
         val chapterVertices = mutableListOf<Vertex<Chapter>>()
@@ -48,8 +53,9 @@ class GraphBuilder {
 
         // TODO: pass option to CliKt to disable this behavior
         val time = measureTimeMillis { transitiveReduction(graph) }
-        println("Removing superseded edges took $time ms")
+        logger.debug { "Removing superseded edges took ${time}ms" }
 
+        logger.debug { "Creating graph done." }
         return graph
     }
 
@@ -62,10 +68,12 @@ class GraphBuilder {
      * May stuck in a loop or throw an OverflowException if the graph is cyclic.
      */
     private fun transitiveReduction(graph: Graph<Chapter>) {
+        logger.debug { "Performing transitive reduction on graph..." }
+
         for (edge in graph.getEdges()) {
             if (pathExists(edge.start, edge.end, edge)) {
                 graph.removeEdge(edge)
-                println("Removed superseded edge: $edge")
+                logger.debug { "Removed superseded edge: $edge" }
             }
         }
     }

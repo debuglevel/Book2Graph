@@ -1,14 +1,16 @@
 package de.debuglevel.book2graph.parser
 
+import mu.KotlinLogging
 import org.w3c.dom.Node
 import java.io.File
 import java.nio.file.Files
-import java.nio.file.Paths
 
 /**
  * Parses a Flat ODT file with specified styles and creates a book object
  */
 class FodtParser {
+    private val logger = KotlinLogging.logger {}
+
     /**
      * parses a given Flat ODT file
      *
@@ -16,6 +18,8 @@ class FodtParser {
      * @return a book object containing the FODT's information
      */
     fun parse(file: File): Book {
+        logger.debug { "Parsing file '$file'..." }
+
         val document = this.loadXML(file)
         val styles = this.getStyles(document)
         val paragraphs = this.getParagraphs(document)
@@ -49,6 +53,7 @@ class FodtParser {
 
         this.checkChaptersErrors(book.chapters)
 
+        logger.debug { "Parsing file '$file' done." }
         return book
     }
 
@@ -78,6 +83,8 @@ class FodtParser {
     }
 
     private fun getStyles(document: XElement): List<Style> {
+        logger.debug { "Getting styles..." }
+
         val styles = this.getAllStyles(document)
         this.assignAutomaticStyles(styles)
         this.assignBaseStyleTypes(styles)
@@ -139,7 +146,7 @@ class FodtParser {
             if (parentStyle != null) {
                 style.parentStyle = parentStyle
             } else {
-                Trace.traceWarning("ParentStyle '" + style.parentStyleName + "' used by '" + style.name + "' not found (or is no base style).")
+                logger.warn("ParentStyle '" + style.parentStyleName + "' used by '" + style.name + "' not found (or is no base style).")
             }
         }
     }
@@ -157,12 +164,16 @@ class FodtParser {
     }
 
     private fun loadXML(file: File): XElement {
+        logger.debug { "Loading XML file '$file'..." }
+
         //val xmlWriter = XmlWriter.Create(StringWriter(), XmlWriterSettings())
         val fileStream = Files.newInputStream(file.toPath())
         return XElement.load(fileStream)
     }
 
     private fun getParagraphs(doc: XElement): List<Paragraph> {
+        logger.debug { "Getting paragraphs..." }
+
         val nsOffice = "urn:oasis:names:tc:opendocument:xmlns:office:1.0"
         val nsText = "urn:oasis:names:tc:opendocument:xmlns:text:1.0"
 
@@ -184,6 +195,8 @@ class FodtParser {
     }
 
     private fun checkChaptersErrors(chapters: List<Chapter>) {
+        logger.debug { "Checking chapters for errors..." }
+
         for (chapter in chapters) {
             this.checkChapterErrors(chapters, chapter)
         }
@@ -198,7 +211,7 @@ class FodtParser {
     private fun checkSummary(chapter: Chapter): Boolean? {
         val success = chapter.summary.any { s -> !s.isBlank() }
         if (!success) {
-            Trace.traceInformation("Chapter '" + chapter.title + "' has no summary")
+            logger.info("Chapter '" + chapter.title + "' has no summary")
             chapter.debugInformation.add(Pair<DebugInformationType, Any?>(DebugInformationType.EmptySummary, null))
         }
 
@@ -207,7 +220,7 @@ class FodtParser {
 
     private fun checkTitle(chapter: Chapter): Boolean {
         if (chapter.title.isBlank()) {
-            Trace.traceInformation("Chapter between '" + chapter.precedingChapter!!.title + "' and '" + chapter.succeedingChapter!!.title + "' has no name.")
+            logger.info("Chapter between '" + chapter.precedingChapter!!.title + "' and '" + chapter.succeedingChapter!!.title + "' has no name.")
             chapter.debugInformation.add(Pair<DebugInformationType, Any?>(DebugInformationType.EmptyTitle, null))
             return false
         }
@@ -222,7 +235,7 @@ class FodtParser {
             val exists = chapters.any { c -> c.title == sibling }
             if (!exists) {
                 failed = true
-                Trace.traceInformation("Chapter '" + sibling + "' is referenced by '" + chapter.title + "' but does not exist.")
+                logger.info("Chapter '" + sibling + "' is referenced by '" + chapter.title + "' but does not exist.")
                 chapter.debugInformation.add(Pair<DebugInformationType, Any?>(DebugInformationType.MissingReference, sibling))
             }
         }

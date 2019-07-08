@@ -1,6 +1,10 @@
 package de.debuglevel.book2graph.parser.graphvizCompatibility
 
+import mu.KotlinLogging
+
 class Graph<T : Any> {
+    private val logger = KotlinLogging.logger {}
+
     private val vertices = mutableSetOf<Vertex<T>>()
     private val edges = mutableSetOf<Edge<Vertex<T>>>()
 
@@ -37,6 +41,8 @@ class Graph<T : Any> {
     }
 
     fun generateDot(): String {
+        logger.debug { "Generating GraphViz dot source..." }
+
         var s = " digraph graphname {\n"
 
         for (vertex in vertices) {
@@ -49,6 +55,7 @@ class Graph<T : Any> {
 
         s += "}\n"
 
+        logger.debug { "Generating GraphViz dot source done." }
         return s
     }
 
