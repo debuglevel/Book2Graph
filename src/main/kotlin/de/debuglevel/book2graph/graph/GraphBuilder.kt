@@ -1,13 +1,14 @@
-package de.debuglevel.book2graph.parser
+package de.debuglevel.book2graph.graph
 
-import de.debuglevel.book2graph.parser.graphvizCompatibility.*
+import de.debuglevel.book2graph.parser.Chapter
+import de.debuglevel.book2graph.parser.RevisionStatus
 import mu.KotlinLogging
 import kotlin.system.measureTimeMillis
 
-class GraphBuilder {
+object GraphBuilder {
     private val logger = KotlinLogging.logger {}
 
-    fun createGraph(
+    fun build(
         chapters: List<Chapter>,
         transitiveReduction: Boolean
     ): Graph<Chapter> {
@@ -18,17 +19,17 @@ class GraphBuilder {
         val chapterVertices = mutableListOf<Vertex<Chapter>>()
         for (chapter in chapters) {
             val color = when {
-                chapter.revisionStatus == RevisionStatus.Good -> Color.palegreen1
-                chapter.revisionStatus == RevisionStatus.Improvable -> Color.palevioletred1
-                chapter.revisionStatus == RevisionStatus.Unreviewed -> Color.palegoldenrod
-                chapter.revisionStatus == RevisionStatus.Milestone -> Color.skyblue1
-                chapter.revisionStatus == RevisionStatus.Unknown -> Color.gray92
-                else -> Color.gray92
+                chapter.revisionStatus == RevisionStatus.Good -> Color.Green
+                chapter.revisionStatus == RevisionStatus.Improvable -> Color.Red
+                chapter.revisionStatus == RevisionStatus.Unreviewed -> Color.Yellow
+                chapter.revisionStatus == RevisionStatus.Milestone -> Color.Blue
+                chapter.revisionStatus == RevisionStatus.Unknown -> Color.Gray
+                else -> Color.Gray
             }
 
             val shape = when {
-                chapter.revisionStatus == RevisionStatus.Milestone -> Shape.rectangle
-                else -> Shape.ellipse
+                chapter.revisionStatus == RevisionStatus.Milestone -> Shape.Rectangle
+                else -> Shape.Ellipse
             }
 
             val tooltip = chapter.summaryAsString.replace("\n", "&#10;")

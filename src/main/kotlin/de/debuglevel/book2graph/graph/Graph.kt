@@ -1,4 +1,4 @@
-package de.debuglevel.book2graph.parser.graphvizCompatibility
+package de.debuglevel.book2graph.graph
 
 import mu.KotlinLogging
 
@@ -31,6 +31,10 @@ class Graph<T : Any> {
         return edges.toSet()
     }
 
+    fun getVertices(): Set<Vertex<T>> {
+        return vertices.toSet()
+    }
+
     fun print() {
         for (vertex in vertices) {
             println(vertex.toString())
@@ -39,24 +43,4 @@ class Graph<T : Any> {
                 .forEach { e -> println("  ${e.end}") }
         }
     }
-
-    fun generateDot(): String {
-        logger.debug { "Generating GraphViz dot source..." }
-
-        var s = " digraph graphname {\n"
-
-        for (vertex in vertices) {
-            s += "${vertex.hashCode()}[label=\"$vertex\",fillcolor=${vertex.color},style=filled,shape=${vertex.shape},tooltip=\"${vertex.tooltip}\"];\n"
-        }
-
-        for (edge in edges) {
-            s += "${edge.start.hashCode()} -> ${edge.end.hashCode()};\n"
-        }
-
-        s += "}\n"
-
-        logger.debug { "Generating GraphViz dot source done." }
-        return s
-    }
-
 }

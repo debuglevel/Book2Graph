@@ -8,7 +8,7 @@ import java.nio.file.Files
 /**
  * Parses a Flat ODT file with specified styles and creates a book object
  */
-class FodtParser {
+object FodtParser {
     private val logger = KotlinLogging.logger {}
 
     /**

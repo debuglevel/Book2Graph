@@ -5,8 +5,10 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
-import de.debuglevel.book2graph.parser.GraphBuilder
-import de.debuglevel.book2graph.visualizer.GraphVisualizer
+import de.debuglevel.book2graph.graph.GraphBuilder
+import de.debuglevel.book2graph.graph.export.DotExporter
+import de.debuglevel.book2graph.graph.export.GraphvizExporter
+import de.debuglevel.book2graph.parser.FodtParser
 import guru.nidi.graphviz.engine.Format
 import mu.KotlinLogging
 import java.io.File
@@ -41,20 +43,10 @@ class Cli : CliktCommand() {
     override fun run() {
         logger.info { "Starting Book2Graph..." }
 
-        val parser = de.debuglevel.book2graph.parser.FodtParser()
-        val book = parser.parse(fodtFile)
-
-        val graph = GraphBuilder().createGraph(book.chapters, transitiveReduction)
-
-        val dot = graph.generateDot()
-        logger.debug {
-            "Generated GraphViz dot source:" +
-                    "===================================" +
-                    dot +
-                    "==================================="
-        }
-
-        GraphVisualizer().render(dot, svgFile, Format.SVG)
+        val book = FodtParser.parse(fodtFile)
+        val graph = GraphBuilder.build(book.chapters, transitiveReduction)
+        val dot = DotExporter.generate(graph)
+        GraphvizExporter.render(dot, svgFile, Format.SVG)
     }
 }
 

@@ -1,18 +1,19 @@
-package de.debuglevel.book2graph.visualizer
+package de.debuglevel.book2graph.graph.export
 
 import guru.nidi.graphviz.engine.Format
 import guru.nidi.graphviz.engine.Graphviz
 import mu.KotlinLogging
 import java.io.File
 
-class GraphVisualizer {
+object GraphvizExporter {
     private val logger = KotlinLogging.logger {}
 
     fun render(dot: String, outputFile: File, format: Format) {
         logger.debug { "Rendering graph visualization to file '$outputFile'..." }
 
         val graph = guru.nidi.graphviz.parse.Parser.read(dot)
-        Graphviz.fromGraph(graph)
+        Graphviz
+            .fromGraph(graph)
             .render(format)
             .toFile(outputFile)
 
