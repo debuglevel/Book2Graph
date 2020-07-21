@@ -14,9 +14,9 @@ object FodtParser : OdtParser() {
     private val logger = KotlinLogging.logger {}
 
     /**
-     * parses a given Flat ODT file
+     * Parses a given Flat ODT file
      *
-     * @param filename the path to the FODT file
+     * @param file the FODT file
      * @return a book object containing the FODT's information
      */
     override fun parse(file: File): Book {
