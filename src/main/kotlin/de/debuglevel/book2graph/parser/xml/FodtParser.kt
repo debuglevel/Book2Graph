@@ -1,6 +1,7 @@
 package de.debuglevel.book2graph.parser.xml
 
 import de.debuglevel.book2graph.book.*
+import de.debuglevel.book2graph.parser.OdtParser
 import mu.KotlinLogging
 import org.w3c.dom.Node
 import java.io.File
@@ -9,7 +10,7 @@ import java.nio.file.Files
 /**
  * Parses a Flat ODT file with specified styles and creates a book object
  */
-object FodtParser {
+object FodtParser : OdtParser() {
     private val logger = KotlinLogging.logger {}
 
     /**
@@ -18,7 +19,7 @@ object FodtParser {
      * @param filename the path to the FODT file
      * @return a book object containing the FODT's information
      */
-    fun parse(file: File): Book {
+    override fun parse(file: File): Book {
         logger.debug { "Parsing file '$file'..." }
 
         val document = loadXML(file)
