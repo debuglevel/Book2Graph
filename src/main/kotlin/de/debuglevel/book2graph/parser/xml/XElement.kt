@@ -3,7 +3,6 @@ package de.debuglevel.book2graph.parser.xml
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node
-import toMutableList
 import java.io.InputStream
 import javax.xml.parsers.DocumentBuilderFactory
 

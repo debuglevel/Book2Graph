@@ -4,7 +4,6 @@ import de.debuglevel.book2graph.book.*
 import de.debuglevel.book2graph.parser.OdtParser
 import mu.KotlinLogging
 import org.w3c.dom.Node
-import toMutableList
 import java.io.File
 import java.nio.file.Files
 

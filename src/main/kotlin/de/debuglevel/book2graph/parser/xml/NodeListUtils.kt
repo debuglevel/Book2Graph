@@ -1,3 +1,5 @@
+package de.debuglevel.book2graph.parser.xml
+
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 
