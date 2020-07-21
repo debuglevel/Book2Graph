@@ -21,16 +21,16 @@ object FodtParser {
     fun parse(file: File): Book {
         logger.debug { "Parsing file '$file'..." }
 
-        val document = this.loadXML(file)
-        val styles = this.getStyles(document)
-        val paragraphs = this.getParagraphs(document)
+        val document = loadXML(file)
+        val styles = getStyles(document)
+        val paragraphs = getParagraphs(document)
 
         val book = Book()
         var lastChapter = Chapter()
         var currentChapter = Chapter()
 
         for (paragraph in paragraphs) {
-            paragraph.style = this.getStyle(styles, paragraph)
+            paragraph.style = getStyle(styles, paragraph)
             val styleType = paragraph.style!!.styleType
             when (styleType) {
                 StyleType.Title -> {
@@ -40,7 +40,7 @@ object FodtParser {
                     currentChapter.precedingChapter = lastChapter
                     lastChapter.succeedingChapter = currentChapter
                     currentChapter.title = paragraph.content
-                    currentChapter.revisionStatus = this.getRevisionStatus(paragraph.style!!)
+                    currentChapter.revisionStatus = getRevisionStatus(paragraph.style!!)
                 }
                 StyleType.Successor -> currentChapter.succeedingChapterReferences.add(paragraph.content)
                 StyleType.Predecessor -> currentChapter.precedingChapterReferences.add(paragraph.content)
@@ -52,7 +52,7 @@ object FodtParser {
             }
         }
 
-        this.checkChaptersErrors(book.chapters)
+        checkChaptersErrors(book.chapters)
 
         logger.debug { "Parsing file '$file' done." }
         return book
@@ -86,15 +86,15 @@ object FodtParser {
     private fun getStyles(document: XElement): List<Style> {
         logger.debug { "Getting styles..." }
 
-        val styles = this.getAllStyles(document)
-        this.assignAutomaticStyles(styles)
-        this.assignBaseStyleTypes(styles)
+        val styles = getAllStyles(document)
+        assignAutomaticStyles(styles)
+        assignBaseStyleTypes(styles)
         return styles
     }
 
     private fun assignBaseStyleTypes(styles: List<Style>) {
         for (style in styles.filter { s -> s.isBaseStyle }) {
-            style.styleType = this.getStyleType(style.name)
+            style.styleType = getStyleType(style.name)
         }
     }
 
@@ -210,14 +210,14 @@ object FodtParser {
         logger.debug { "Checking chapters for errors..." }
 
         for (chapter in chapters) {
-            this.checkChapterErrors(chapters, chapter)
+            checkChapterErrors(chapters, chapter)
         }
     }
 
     private fun checkChapterErrors(chapters: List<Chapter>, chapter: Chapter) {
-        this.checkReferences(chapters, chapter)
-        this.checkTitle(chapter)
-        this.checkSummary(chapter)
+        checkReferences(chapters, chapter)
+        checkTitle(chapter)
+        checkSummary(chapter)
     }
 
     private fun checkSummary(chapter: Chapter): Boolean? {
