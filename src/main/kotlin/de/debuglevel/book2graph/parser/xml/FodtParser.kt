@@ -1,4 +1,4 @@
-package de.debuglevel.book2graph.parser
+package de.debuglevel.book2graph.parser.xml
 
 import de.debuglevel.book2graph.book.*
 import mu.KotlinLogging
@@ -30,7 +30,8 @@ object FodtParser {
         var currentChapter = Chapter()
 
         for (paragraph in paragraphs) {
-            paragraph.style = getStyle(styles, paragraph)
+            paragraph.style =
+                getStyle(styles, paragraph)
             val styleType = paragraph.style!!.styleType
             when (styleType) {
                 StyleType.Title -> {
@@ -40,7 +41,8 @@ object FodtParser {
                     currentChapter.precedingChapter = lastChapter
                     lastChapter.succeedingChapter = currentChapter
                     currentChapter.title = paragraph.content
-                    currentChapter.revisionStatus = getRevisionStatus(paragraph.style!!)
+                    currentChapter.revisionStatus =
+                        getRevisionStatus(paragraph.style!!)
                 }
                 StyleType.Successor -> currentChapter.succeedingChapterReferences.add(paragraph.content)
                 StyleType.Predecessor -> currentChapter.precedingChapterReferences.add(paragraph.content)
@@ -106,7 +108,9 @@ object FodtParser {
         var xmlStyles =
             document.descendants(nsOffice, "styles") //.descendants(nsOffice, "text").descendants(nsText, "p")
         for (xmlStyle in xmlStyles) {
-            val styleNodes = XElement.toMutableList(xmlStyle.childNodes).filter { x ->
+            val styleNodes = XElement.toMutableList(
+                xmlStyle.childNodes
+            ).filter { x ->
                 x.localName == "style"
             }
             xmlDefinedStyles.addAll(styleNodes)
@@ -124,7 +128,9 @@ object FodtParser {
         xmlStyles =
             document.descendants(nsOffice, "automatic-styles") //.descendants(nsOffice, "text").descendants(nsText, "p")
         for (xmlStyle in xmlStyles) {
-            val styleNodes = XElement.toMutableList(xmlStyle.childNodes).filter { x -> x.localName == "style" }
+            val styleNodes = XElement.toMutableList(
+                xmlStyle.childNodes
+            ).filter { x -> x.localName == "style" }
             xmlAtomaticStyles.addAll(styleNodes)
 
         }
@@ -188,10 +194,13 @@ object FodtParser {
 
         val bodies = doc.descendants(nsOffice, "body") //.descendants(nsOffice, "text").descendants(nsText, "p")
         for (body in bodies) {
-            val textNodes = XElement.toMutableList(body.childNodes).filter { x -> x.localName == "text" }
+            val textNodes = XElement.toMutableList(body.childNodes)
+                .filter { x -> x.localName == "text" }
 
             for (textNode in textNodes) {
-                val pNodes = XElement.toMutableList(textNode.childNodes).filter { x -> x.localName == "p" }
+                val pNodes = XElement.toMutableList(
+                    textNode.childNodes
+                ).filter { x -> x.localName == "p" }
                 xmlParagraphs.addAll(pNodes)
             }
         }

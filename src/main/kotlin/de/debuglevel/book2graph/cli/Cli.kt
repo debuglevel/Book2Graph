@@ -8,7 +8,7 @@ import com.github.ajalt.clikt.parameters.types.file
 import de.debuglevel.book2graph.graph.GraphBuilder
 import de.debuglevel.book2graph.graph.export.DotExporter
 import de.debuglevel.book2graph.graph.export.GraphvizExporter
-import de.debuglevel.book2graph.parser.FodtParser
+import de.debuglevel.book2graph.parser.xml.FodtParser
 import guru.nidi.graphviz.engine.Format
 import mu.KotlinLogging
 import java.io.File
