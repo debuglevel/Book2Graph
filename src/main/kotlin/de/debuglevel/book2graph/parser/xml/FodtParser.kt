@@ -31,8 +31,7 @@ object FodtParser : OdtParser() {
         var currentChapter = Chapter()
 
         for (paragraph in paragraphs) {
-            paragraph.style =
-                getStyle(styles, paragraph)
+            paragraph.style = getStyle(styles, paragraph)
             val styleType = paragraph.style!!.styleType
             when (styleType) {
                 StyleType.Title -> {
@@ -168,11 +167,11 @@ object FodtParser : OdtParser() {
 
     private fun getRevisionStatus(style: Style): RevisionStatus {
         val styleName = style.name
-        return when {
-            styleName == "ZZTitelGeprueft" -> RevisionStatus.Good
-            styleName == "ZZTitelVerbesserungsbeduerftig" -> RevisionStatus.Improvable
-            styleName == "ZZTitelUngeprueft" -> RevisionStatus.NotReviewed
-            styleName == "ZZTitelMeilenstein" -> RevisionStatus.Milestone
+        return when (styleName) {
+            "ZZTitelGeprueft" -> RevisionStatus.Good
+            "ZZTitelVerbesserungsbeduerftig" -> RevisionStatus.Improvable
+            "ZZTitelUngeprueft" -> RevisionStatus.NotReviewed
+            "ZZTitelMeilenstein" -> RevisionStatus.Milestone
             else -> RevisionStatus.Unknown
         }
     }
