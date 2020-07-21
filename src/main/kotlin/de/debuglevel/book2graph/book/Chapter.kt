@@ -1,4 +1,4 @@
-package de.debuglevel.book2graph.parser
+package de.debuglevel.book2graph.book
 
 class Chapter {
     var title = ""

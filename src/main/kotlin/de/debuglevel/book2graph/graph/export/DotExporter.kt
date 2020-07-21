@@ -1,7 +1,7 @@
 package de.debuglevel.book2graph.graph.export
 
+import de.debuglevel.book2graph.book.Chapter
 import de.debuglevel.book2graph.graph.Graph
-import de.debuglevel.book2graph.parser.Chapter
 import mu.KotlinLogging
 
 object DotExporter {

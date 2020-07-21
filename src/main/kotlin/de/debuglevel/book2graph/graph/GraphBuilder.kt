@@ -1,7 +1,7 @@
 package de.debuglevel.book2graph.graph
 
-import de.debuglevel.book2graph.parser.Chapter
-import de.debuglevel.book2graph.parser.RevisionStatus
+import de.debuglevel.book2graph.book.Chapter
+import de.debuglevel.book2graph.book.RevisionStatus
 import mu.KotlinLogging
 import kotlin.system.measureTimeMillis
 

@@ -1,5 +1,6 @@
 package de.debuglevel.book2graph.parser
 
+import de.debuglevel.book2graph.book.*
 import mu.KotlinLogging
 import org.w3c.dom.Node
 import java.io.File
