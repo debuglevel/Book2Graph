@@ -4,6 +4,7 @@ import de.debuglevel.book2graph.book.*
 import de.debuglevel.book2graph.parser.OdtParser
 import mu.KotlinLogging
 import org.w3c.dom.Node
+import toMutableList
 import java.io.File
 import java.nio.file.Files
 
@@ -41,8 +42,7 @@ object FodtParser : OdtParser() {
                     currentChapter.precedingChapter = lastChapter
                     lastChapter.succeedingChapter = currentChapter
                     currentChapter.title = paragraph.content
-                    currentChapter.revisionStatus =
-                        getRevisionStatus(paragraph.style!!)
+                    currentChapter.revisionStatus = getRevisionStatus(paragraph.style!!)
                 }
                 StyleType.Successor -> currentChapter.succeedingChapterReferences.add(paragraph.content)
                 StyleType.Predecessor -> currentChapter.precedingChapterReferences.add(paragraph.content)
@@ -54,7 +54,7 @@ object FodtParser : OdtParser() {
             }
         }
 
-        checkChaptersErrors(book.chapters)
+        Checker(book).check()
 
         logger.debug { "Parsing file '$file' done." }
         return book
@@ -72,6 +72,8 @@ object FodtParser : OdtParser() {
     }
 
     private fun getStyleType(styleName: String): StyleType {
+        logger.trace { "Getting style enum for style with name '$styleName'..." }
+
         return when {
             styleName.startsWith("ZZTitel") -> StyleType.Title
             styleName == "ZZEinordnungDanach" -> StyleType.Successor
@@ -79,9 +81,11 @@ object FodtParser : OdtParser() {
             styleName == "ZZZusammenfassung" -> StyleType.Summary
             styleName == "ZZKommentar" -> StyleType.Comment
             styleName == "ZZInhalt" -> StyleType.Content
-            else -> //Trace.traceWarning("unknown style name used: " + paragraph.StyleName);
+            else -> {
+                logger.trace { "unknown style name used: $styleName" }
                 //paragraph.DebugInformation.Add(new KeyValuePair<DebugInformationType, object>(DebugInformationType.UnknownStyle, paragraph.StyleName));
                 StyleType.Unknown
+            }
         }
     }
 
@@ -89,85 +93,117 @@ object FodtParser : OdtParser() {
         logger.debug { "Getting styles..." }
 
         val styles = getAllStyles(document)
-        assignAutomaticStyles(styles)
+        assignAutomaticGeneratedStyles(styles)
         assignBaseStyleTypes(styles)
         return styles
     }
 
     private fun assignBaseStyleTypes(styles: List<Style>) {
-        for (style in styles.filter { s -> s.isBaseStyle }) {
+        val baseStyles = styles.filter { it.isBaseStyle }
+        for (style in baseStyles) {
             style.styleType = getStyleType(style.name)
         }
     }
 
     private fun getAllStyles(document: XElement): List<Style> {
+        logger.trace { "Getting all styles..." }
+
+        val userDefinedStyles = getUserDefinedStyles(document)
+        val automaticGeneratedStyles = getAutomaticGeneratedStyles(document)
+
+        val allStyles = automaticGeneratedStyles.union(userDefinedStyles)
+
+        logger.trace { "Got ${allStyles.size} styles." }
+        return allStyles.toList()
+    }
+
+    /**
+     * @param type "styles" or "automatic-styles"
+     */
+    private fun getXmlStyles(document: XElement, type: String): List<Node> {
+        logger.trace { "Getting all styles of type '$type' defined in XML..." }
+
         val nsOffice = "urn:oasis:names:tc:opendocument:xmlns:office:1.0"
         val nsStyle = "urn:oasis:names:tc:opendocument:xmlns:style:1.0"
 
-        val xmlDefinedStyles = mutableListOf<Node>()
-        var xmlStyles =
-            document.descendants(nsOffice, "styles") //.descendants(nsOffice, "text").descendants(nsText, "p")
+        val xmlStyles = document.descendants(nsOffice, type)
+
+        val xmlStyles2 = mutableListOf<Node>()
         for (xmlStyle in xmlStyles) {
-            val styleNodes = XElement.toMutableList(
-                xmlStyle.childNodes
-            ).filter { x ->
-                x.localName == "style"
-            }
-            xmlDefinedStyles.addAll(styleNodes)
-
-        }
-        val definedStyles = xmlDefinedStyles.map { x ->
-            Style(
-                x.attributes.getNamedItemNS("urn:oasis:names:tc:opendocument:xmlns:style:1.0", "name").textContent,
-                true,
-                null
-            )
+            val styleNodes = xmlStyle.childNodes.toMutableList()
+                .filter { it.localName == "style" }
+            xmlStyles2.addAll(styleNodes)
         }
 
-        val xmlAtomaticStyles = mutableListOf<Node>()
-        xmlStyles =
-            document.descendants(nsOffice, "automatic-styles") //.descendants(nsOffice, "text").descendants(nsText, "p")
-        for (xmlStyle in xmlStyles) {
-            val styleNodes = XElement.toMutableList(
-                xmlStyle.childNodes
-            ).filter { x -> x.localName == "style" }
-            xmlAtomaticStyles.addAll(styleNodes)
-
-        }
-        val automaticStyles = xmlAtomaticStyles.map { x ->
-            Style(
-                x.attributes.getNamedItemNS("urn:oasis:names:tc:opendocument:xmlns:style:1.0", "name").textContent,
-                false,
-                x.attributes.getNamedItem("style:parent-style-name")?.textContent
-            )
-        }
-
-        val styles = automaticStyles.union(definedStyles)
-
-        return styles.toList()
+        logger.trace { "Got ${xmlStyles2.size} styles of type '$type' defined in XML." }
+        return xmlStyles2
     }
 
-    private fun assignAutomaticStyles(styles: List<Style>) {
+    private fun getUserDefinedStyles(document: XElement): List<Style> {
+        logger.trace { "Getting user defined styles..." }
+
+        val xmlUserDefinedStyles = getXmlStyles(document, "styles")
+        val userDefinedStyles = xmlUserDefinedStyles.map {
+            val styleName =
+                it.attributes.getNamedItemNS("urn:oasis:names:tc:opendocument:xmlns:style:1.0", "name").textContent
+            Style(styleName, true, null)
+        }
+
+        logger.trace { "Got ${userDefinedStyles.size} user defined styles." }
+        return userDefinedStyles
+    }
+
+    private fun getAutomaticGeneratedStyles(document: XElement): List<Style> {
+        logger.trace { "Getting automatic generated styles..." }
+
+        val xmlAutomaticStyles = getXmlStyles(document, "automatic-styles")
+        val automaticGeneratedStyles = xmlAutomaticStyles.map {
+            val styleName =
+                it.attributes.getNamedItemNS("urn:oasis:names:tc:opendocument:xmlns:style:1.0", "name").textContent
+            val parentStyleName = it.attributes.getNamedItem("style:parent-style-name")?.textContent
+            Style(styleName, false, parentStyleName)
+        }
+
+        logger.trace { "Got ${automaticGeneratedStyles.size} automatic generated styles." }
+        return automaticGeneratedStyles
+    }
+
+    /**
+     * Finds and sets the base styles for automatic generated styles.
+     */
+    private fun assignAutomaticGeneratedStyles(styles: List<Style>) {
         for (style in styles) {
-            if (style.parentStyleName == null) {
-                continue
-            }
-
-            val parentStyle = styles.firstOrNull { s ->
-                s.name == style.parentStyleName && s.isBaseStyle
-            }
-
-            if (parentStyle != null) {
-                style.parentStyle = parentStyle
-            } else {
-                logger.warn("ParentStyle '" + style.parentStyleName + "' used by '" + style.name + "' not found (or is no base style).")
-            }
+            assignAutomaticGeneratedStyle(style, styles)
         }
     }
 
+    /**
+     * Finds and sets the base style for a automatic generated style.
+     */
+    private fun assignAutomaticGeneratedStyle(style: Style, styles: List<Style>) {
+        // style has no parent style; nothing to do
+        if (style.parentStyleName == null) {
+            return
+        }
+
+        // find the base style with the according name
+        val parentStyle = styles.firstOrNull { s ->
+            s.isBaseStyle && s.name == style.parentStyleName
+        }
+
+        if (parentStyle != null) {
+            style.parentStyle = parentStyle
+        } else {
+            // warn if some inconsistency was found
+            logger.warn("ParentStyle '${style.parentStyleName}' used by '${style.name}' not found (or is no base style).")
+        }
+    }
+
+    /**
+     * Gets the revision status based on the style name (by convention).
+     */
     private fun getRevisionStatus(style: Style): RevisionStatus {
-        val styleName = style.name
-        return when (styleName) {
+        return when (style.name) {
             "ZZTitelGeprueft" -> RevisionStatus.Good
             "ZZTitelVerbesserungsbeduerftig" -> RevisionStatus.Improvable
             "ZZTitelUngeprueft" -> RevisionStatus.NotReviewed
@@ -179,12 +215,11 @@ object FodtParser : OdtParser() {
     private fun loadXML(file: File): XElement {
         logger.debug { "Loading XML file '$file'..." }
 
-        //val xmlWriter = XmlWriter.Create(StringWriter(), XmlWriterSettings())
         val fileStream = Files.newInputStream(file.toPath())
         return XElement.load(fileStream)
     }
 
-    private fun getParagraphs(doc: XElement): List<Paragraph> {
+    private fun getParagraphs(document: XElement): List<Paragraph> {
         logger.debug { "Getting paragraphs..." }
 
         val nsOffice = "urn:oasis:names:tc:opendocument:xmlns:office:1.0"
@@ -192,81 +227,26 @@ object FodtParser : OdtParser() {
 
         val xmlParagraphs = mutableListOf<Node>()
 
-        val bodies = doc.descendants(nsOffice, "body") //.descendants(nsOffice, "text").descendants(nsText, "p")
+        val bodies = document.descendants(nsOffice, "body")
         for (body in bodies) {
-            val textNodes = XElement.toMutableList(body.childNodes)
-                .filter { x -> x.localName == "text" }
+            val textNodes = body.childNodes.toMutableList()
+                .filter { it.localName == "text" }
 
             for (textNode in textNodes) {
-                val pNodes = XElement.toMutableList(
-                    textNode.childNodes
-                ).filter { x -> x.localName == "p" }
+                val pNodes = textNode.childNodes.toMutableList()
+                    .filter { it.localName == "p" }
                 xmlParagraphs.addAll(pNodes)
             }
         }
 
-        val paragraphs = xmlParagraphs.map { x ->
-            Paragraph(
-                x.textContent,
-                x.attributes.getNamedItem("text:style-name").textContent
-            )
+        val paragraphs = xmlParagraphs.map {
+            val styleName = it.attributes.getNamedItem("text:style-name").textContent
+            val content = it.textContent
+            Paragraph(content, styleName)
         }
 
+        logger.debug { "Got ${paragraphs.size} paragraphs." }
         return paragraphs.toList()
-    }
-
-    private fun checkChaptersErrors(chapters: List<Chapter>) {
-        logger.debug { "Checking chapters for errors..." }
-
-        for (chapter in chapters) {
-            checkChapterErrors(chapters, chapter)
-        }
-    }
-
-    private fun checkChapterErrors(chapters: List<Chapter>, chapter: Chapter) {
-        checkReferences(chapters, chapter)
-        checkTitle(chapter)
-        checkSummary(chapter)
-    }
-
-    private fun checkSummary(chapter: Chapter): Boolean? {
-        val success = chapter.summary.any { s -> !s.isBlank() }
-        if (!success) {
-            logger.info("Chapter '" + chapter.title + "' has no summary")
-            chapter.debugInformation.add(Pair<DebugInformationType, Any?>(DebugInformationType.EmptySummary, null))
-        }
-
-        return (!success)
-    }
-
-    private fun checkTitle(chapter: Chapter): Boolean {
-        if (chapter.title.isBlank()) {
-            logger.info("Chapter between '" + chapter.precedingChapter!!.title + "' and '" + chapter.succeedingChapter!!.title + "' has no name.")
-            chapter.debugInformation.add(Pair<DebugInformationType, Any?>(DebugInformationType.EmptyTitle, null))
-            return false
-        }
-
-        return true
-    }
-
-    private fun checkReferences(chapters: List<Chapter>, chapter: Chapter): Boolean? {
-        var failed = false
-
-        for (sibling in chapter.precedingChapterReferences.union(chapter.succeedingChapterReferences)) {
-            val exists = chapters.any { c -> c.title == sibling }
-            if (!exists) {
-                failed = true
-                logger.info("Chapter '" + sibling + "' is referenced by '" + chapter.title + "' but does not exist.")
-                chapter.debugInformation.add(
-                    Pair<DebugInformationType, Any?>(
-                        DebugInformationType.MissingReference,
-                        sibling
-                    )
-                )
-            }
-        }
-
-        return failed
     }
 }
 
