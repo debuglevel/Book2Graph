@@ -24,7 +24,6 @@ object GraphBuilder {
                 RevisionStatus.NotReviewed -> Color.Yellow
                 RevisionStatus.Milestone -> Color.Blue
                 RevisionStatus.Unknown -> Color.Gray
-                else -> Color.Gray
             }
 
             val shape = when (chapter.revisionStatus) {
