@@ -94,6 +94,8 @@ object FodtParser : OdtParser() {
         val styles = getAllStyles(document)
         assignAutomaticGeneratedStyles(styles)
         assignBaseStyleTypes(styles)
+
+        logger.debug { "Got ${styles.size} styles." }
         return styles
     }
 
