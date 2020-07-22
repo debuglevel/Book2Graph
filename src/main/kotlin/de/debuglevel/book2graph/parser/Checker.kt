@@ -1,4 +1,4 @@
-package de.debuglevel.book2graph.parser.xml
+package de.debuglevel.book2graph.parser
 
 import de.debuglevel.book2graph.book.Book
 import de.debuglevel.book2graph.book.Chapter
@@ -9,6 +9,7 @@ class Checker(val book: Book) {
     private val logger = KotlinLogging.logger {}
 
     fun check() {
+        logger.debug { "Checking book for errors..." }
         checkChaptersErrors(book.chapters)
     }
 

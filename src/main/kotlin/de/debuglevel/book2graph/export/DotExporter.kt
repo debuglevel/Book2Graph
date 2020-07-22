@@ -1,4 +1,4 @@
-package de.debuglevel.book2graph.graph.export
+package de.debuglevel.book2graph.export
 
 import de.debuglevel.book2graph.book.Chapter
 import de.debuglevel.book2graph.graph.Graph
@@ -7,10 +7,10 @@ import mu.KotlinLogging
 object DotExporter {
     private val logger = KotlinLogging.logger {}
 
-    fun generate(graph: Graph<Chapter>): String {
+    fun export(graph: Graph<Chapter>): String {
         logger.debug { "Generating GraphViz dot source..." }
 
-        var s = " digraph graphname {\n"
+        var s = "digraph graphname {\n"
 
         for (vertex in graph.getVertices()) {
             s += "${vertex.hashCode()}[label=\"$vertex\",fillcolor=${vertex.color.graphvizValue},style=filled,shape=${vertex.shape.graphvizValue},tooltip=\"${vertex.tooltip}\"];\n"

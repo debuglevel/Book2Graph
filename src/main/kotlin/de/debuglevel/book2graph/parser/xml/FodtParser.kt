@@ -1,6 +1,7 @@
 package de.debuglevel.book2graph.parser.xml
 
 import de.debuglevel.book2graph.book.*
+import de.debuglevel.book2graph.parser.Checker
 import de.debuglevel.book2graph.parser.OdtParser
 import mu.KotlinLogging
 import org.w3c.dom.Node
@@ -13,6 +14,12 @@ import java.nio.file.Files
 object FodtParser : OdtParser() {
     private val logger = KotlinLogging.logger {}
 
+    private const val officeNamespace = "urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+    private const val textNamespace = "urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+    private const val styleNamespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+
+    private var document: XElement? = null
+
     /**
      * Parses a given Flat ODT file
      *
@@ -22,9 +29,9 @@ object FodtParser : OdtParser() {
     override fun parse(file: File): Book {
         logger.debug { "Parsing file '$file'..." }
 
-        val document = loadXML(file)
-        val styles = getStyles(document)
-        val paragraphs = getParagraphs(document)
+        loadDocument(file)
+        val styles = getStyles()
+        val paragraphs = getParagraphs()
 
         val book = Book()
         var lastChapter = Chapter()
@@ -60,43 +67,45 @@ object FodtParser : OdtParser() {
     }
 
     private fun getStyle(styles: List<Style>, paragraph: Paragraph): Style? {
-        //Trace.traceInformation("getStyle: "+paragraph.styleName)
         val styleName = paragraph.styleName
         val style = styles.first { s -> s.name == styleName }
 
-        return when {
-            style.isBaseStyle -> style
-            else -> style.parentStyle
+        return when (style.isBaseStyle) {
+            true -> style
+            false -> style.parentStyle
         }
     }
 
-    private fun getStyleType(styleName: String): StyleType {
-        logger.trace { "Getting style enum for style with name '$styleName'..." }
-
-        return when {
-            styleName.startsWith("ZZTitel") -> StyleType.Title
-            styleName == "ZZEinordnungDanach" -> StyleType.Successor
-            styleName == "ZZEinordnungVorher" -> StyleType.Predecessor
-            styleName == "ZZZusammenfassung" -> StyleType.Summary
-            styleName == "ZZKommentar" -> StyleType.Comment
-            styleName == "ZZInhalt" -> StyleType.Content
-            else -> {
-                logger.trace { "unknown style name used: $styleName" }
-                //paragraph.DebugInformation.Add(new KeyValuePair<DebugInformationType, object>(DebugInformationType.UnknownStyle, paragraph.StyleName));
-                StyleType.Unknown
-            }
-        }
-    }
-
-    private fun getStyles(document: XElement): List<Style> {
+    override fun getStyles(): List<Style> {
         logger.debug { "Getting styles..." }
 
-        val styles = getAllStyles(document)
-        assignAutomaticGeneratedStyles(styles)
+        val styles = getAllStyles()
         assignBaseStyleTypes(styles)
+        assignAutomaticGeneratedStyles(styles)
 
         logger.debug { "Got ${styles.size} styles." }
         return styles
+    }
+
+    private fun getAllStyles(): List<Style> {
+        logger.trace { "Getting all styles..." }
+
+        val userDefinedStyles = getUserDefinedStyles()
+        val automaticGeneratedStyles = getAutomaticGeneratedStyles()
+
+        val allStyles = automaticGeneratedStyles.union(userDefinedStyles)
+
+        logger.trace { "Got ${allStyles.size} styles." }
+        return allStyles.toList()
+    }
+
+    /**
+     * Finds and sets the base styles for automatic generated styles.
+     */
+    private fun assignAutomaticGeneratedStyles(styles: List<Style>) {
+        for (style in styles) {
+            assignAutomaticGeneratedStyle(style, styles)
+        }
     }
 
     private fun assignBaseStyleTypes(styles: List<Style>) {
@@ -106,28 +115,16 @@ object FodtParser : OdtParser() {
         }
     }
 
-    private fun getAllStyles(document: XElement): List<Style> {
-        logger.trace { "Getting all styles..." }
-
-        val userDefinedStyles = getUserDefinedStyles(document)
-        val automaticGeneratedStyles = getAutomaticGeneratedStyles(document)
-
-        val allStyles = automaticGeneratedStyles.union(userDefinedStyles)
-
-        logger.trace { "Got ${allStyles.size} styles." }
-        return allStyles.toList()
-    }
-
     /**
      * @param type "styles" or "automatic-styles"
      */
-    private fun getXmlStyles(document: XElement, type: String): List<Node> {
+    private fun getXmlStyles(type: String): List<Node> {
         logger.trace { "Getting all styles of type '$type' defined in XML..." }
 
-        val nsOffice = "urn:oasis:names:tc:opendocument:xmlns:office:1.0"
-        val nsStyle = "urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+        val nsOffice = officeNamespace
+        val nsStyle = styleNamespace
 
-        val xmlStyles = document.descendants(nsOffice, type)
+        val xmlStyles = document!!.descendants(nsOffice, type)
 
         val xmlStyles2 = mutableListOf<Node>()
         for (xmlStyle in xmlStyles) {
@@ -140,13 +137,13 @@ object FodtParser : OdtParser() {
         return xmlStyles2
     }
 
-    private fun getUserDefinedStyles(document: XElement): List<Style> {
+    private fun getUserDefinedStyles(): List<Style> {
         logger.trace { "Getting user defined styles..." }
 
-        val xmlUserDefinedStyles = getXmlStyles(document, "styles")
+        val xmlUserDefinedStyles = getXmlStyles("styles")
         val userDefinedStyles = xmlUserDefinedStyles.map {
             val styleName =
-                it.attributes.getNamedItemNS("urn:oasis:names:tc:opendocument:xmlns:style:1.0", "name").textContent
+                it.attributes.getNamedItemNS(styleNamespace, "name").textContent
             Style(styleName, true, null)
         }
 
@@ -154,28 +151,19 @@ object FodtParser : OdtParser() {
         return userDefinedStyles
     }
 
-    private fun getAutomaticGeneratedStyles(document: XElement): List<Style> {
+    private fun getAutomaticGeneratedStyles(): List<Style> {
         logger.trace { "Getting automatic generated styles..." }
 
-        val xmlAutomaticStyles = getXmlStyles(document, "automatic-styles")
+        val xmlAutomaticStyles = getXmlStyles("automatic-styles")
         val automaticGeneratedStyles = xmlAutomaticStyles.map {
             val styleName =
-                it.attributes.getNamedItemNS("urn:oasis:names:tc:opendocument:xmlns:style:1.0", "name").textContent
+                it.attributes.getNamedItemNS(styleNamespace, "name").textContent
             val parentStyleName = it.attributes.getNamedItem("style:parent-style-name")?.textContent
             Style(styleName, false, parentStyleName)
         }
 
         logger.trace { "Got ${automaticGeneratedStyles.size} automatic generated styles." }
         return automaticGeneratedStyles
-    }
-
-    /**
-     * Finds and sets the base styles for automatic generated styles.
-     */
-    private fun assignAutomaticGeneratedStyles(styles: List<Style>) {
-        for (style in styles) {
-            assignAutomaticGeneratedStyle(style, styles)
-        }
     }
 
     /**
@@ -200,35 +188,19 @@ object FodtParser : OdtParser() {
         }
     }
 
-    /**
-     * Gets the revision status based on the style name (by convention).
-     */
-    private fun getRevisionStatus(style: Style): RevisionStatus {
-        return when (style.name) {
-            "ZZTitelGeprueft" -> RevisionStatus.Good
-            "ZZTitelVerbesserungsbeduerftig" -> RevisionStatus.Improvable
-            "ZZTitelUngeprueft" -> RevisionStatus.NotReviewed
-            "ZZTitelMeilenstein" -> RevisionStatus.Milestone
-            else -> RevisionStatus.Unknown
-        }
-    }
-
-    private fun loadXML(file: File): XElement {
+    override fun loadDocument(file: File) {
         logger.debug { "Loading XML file '$file'..." }
 
         val fileStream = Files.newInputStream(file.toPath())
-        return XElement.load(fileStream)
+        document = XElement.load(fileStream)
     }
 
-    private fun getParagraphs(document: XElement): List<Paragraph> {
+    override fun getParagraphs(): List<Paragraph> {
         logger.debug { "Getting paragraphs..." }
-
-        val nsOffice = "urn:oasis:names:tc:opendocument:xmlns:office:1.0"
-        val nsText = "urn:oasis:names:tc:opendocument:xmlns:text:1.0"
 
         val xmlParagraphs = mutableListOf<Node>()
 
-        val bodies = document.descendants(nsOffice, "body")
+        val bodies = document!!.descendants(officeNamespace, "body")
         for (body in bodies) {
             val textNodes = body.childNodes.toMutableList()
                 .filter { it.localName == "text" }
