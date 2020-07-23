@@ -6,27 +6,25 @@ import org.w3c.dom.Node
 import java.io.InputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
-class XElement {
-    var document: Document? = null
-    var element: Element? = null
-
+class XElement(
+    private val document: Document,
+    private val element: Element
+) {
     companion object {
         fun load(inputStream: InputStream): XElement {
-            val dbFactory = DocumentBuilderFactory.newInstance()
-            dbFactory.isNamespaceAware = true
-            val dBuilder = dbFactory.newDocumentBuilder()
-            val document = dBuilder.parse(inputStream)
+            val documentBuilderFactory = DocumentBuilderFactory.newInstance()
+            documentBuilderFactory.isNamespaceAware = true
+            val documentBuilder = documentBuilderFactory.newDocumentBuilder()
+            val document = documentBuilder.parse(inputStream)
 
-            val xelement = XElement()
-            xelement.document = document
-            xelement.element = document.documentElement
+            val xelement = XElement(document, document.documentElement)
 
             return xelement
         }
     }
 
     fun descendants(namespace: String, elementName: String): List<Node> {
-        val nodeList = this.element?.getElementsByTagNameNS(namespace, elementName)!!
+        val nodeList = this.element.getElementsByTagNameNS(namespace, elementName)!!
         return nodeList.asList
     }
 }

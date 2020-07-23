@@ -18,7 +18,7 @@ object FodtParser : OdtParser() {
     private const val textNamespace = "urn:oasis:names:tc:opendocument:xmlns:text:1.0"
     private const val styleNamespace = "urn:oasis:names:tc:opendocument:xmlns:style:1.0"
 
-    private var document: XElement? = null
+    private lateinit var document: XElement
 
     /**
      * Parses a given Flat ODT file
@@ -82,7 +82,7 @@ object FodtParser : OdtParser() {
 
     override fun getStyles(): List<Style> {
         logger.debug { "Getting styles..." }
-        val styles = FodtStyleParser(document!!).getStyles()
+        val styles = FodtStyleParser(document).getStyles()
         logger.debug { "Got ${styles.size} styles." }
         return styles
     }
@@ -99,7 +99,7 @@ object FodtParser : OdtParser() {
 
         val xmlParagraphs = mutableListOf<Node>()
 
-        val bodies = document!!.descendants(officeNamespace, "body")
+        val bodies = document.descendants(officeNamespace, "body")
         for (body in bodies) {
             val textNodes = body.childNodes.asList
                 .filter { it.localName == "text" }
