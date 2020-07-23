@@ -1,6 +1,9 @@
 package de.debuglevel.book2graph.parser
 
-import de.debuglevel.book2graph.book.*
+import de.debuglevel.book2graph.book.Book
+import de.debuglevel.book2graph.book.Paragraph
+import de.debuglevel.book2graph.book.RevisionStatus
+import de.debuglevel.book2graph.book.Style
 import mu.KotlinLogging
 import java.io.File
 
@@ -28,27 +31,6 @@ abstract class OdtParser {
             "ZZTitelUngeprueft" -> RevisionStatus.NotReviewed
             "ZZTitelMeilenstein" -> RevisionStatus.Milestone
             else -> RevisionStatus.Unknown
-        }
-    }
-
-    /**
-     * Gets the Style defined by a style name.
-     */
-    protected fun getStyleType(styleName: String): StyleType {
-        logger.trace { "Getting style enum for style with name '$styleName'..." }
-
-        return when {
-            styleName.startsWith("ZZTitel") -> StyleType.Title
-            styleName == "ZZEinordnungDanach" -> StyleType.Successor
-            styleName == "ZZEinordnungVorher" -> StyleType.Predecessor
-            styleName == "ZZZusammenfassung" -> StyleType.Summary
-            styleName == "ZZKommentar" -> StyleType.Comment
-            styleName == "ZZInhalt" -> StyleType.Content
-            else -> {
-                logger.trace { "unknown style name used: $styleName" }
-                //paragraph.DebugInformation.Add(new KeyValuePair<DebugInformationType, object>(DebugInformationType.UnknownStyle, paragraph.StyleName));
-                StyleType.Unknown
-            }
         }
     }
 

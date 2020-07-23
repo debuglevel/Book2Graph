@@ -67,125 +67,24 @@ object FodtParser : OdtParser() {
     }
 
     private fun getStyle(styles: List<Style>, paragraph: Paragraph): Style? {
-        val styleName = paragraph.styleName
-        val style = styles.first { s -> s.name == styleName }
+        logger.trace { "Getting style for paragraph(styleName='${paragraph.styleName}')..." }
 
-        return when (style.isBaseStyle) {
+        val style = styles.first { it.name == paragraph.styleName }
+
+        val userDefinedStyle = when (style.isUserDefinedStyle) {
             true -> style
-            false -> style.parentStyle
+            false -> style.userDefinedStyle
         }
+
+        logger.trace { "Got style '${userDefinedStyle.toString()}' for paragraph." }
+        return userDefinedStyle
     }
 
     override fun getStyles(): List<Style> {
         logger.debug { "Getting styles..." }
-
-        val styles = getAllStyles()
-        assignBaseStyleTypes(styles)
-        assignAutomaticGeneratedStyles(styles)
-
+        val styles = FodtStyleParser(document!!).getStyles()
         logger.debug { "Got ${styles.size} styles." }
         return styles
-    }
-
-    private fun getAllStyles(): List<Style> {
-        logger.trace { "Getting all styles..." }
-
-        val userDefinedStyles = getUserDefinedStyles()
-        val automaticGeneratedStyles = getAutomaticGeneratedStyles()
-
-        val allStyles = automaticGeneratedStyles.union(userDefinedStyles)
-
-        logger.trace { "Got ${allStyles.size} styles." }
-        return allStyles.toList()
-    }
-
-    /**
-     * Finds and sets the base styles for automatic generated styles.
-     */
-    private fun assignAutomaticGeneratedStyles(styles: List<Style>) {
-        for (style in styles) {
-            assignAutomaticGeneratedStyle(style, styles)
-        }
-    }
-
-    private fun assignBaseStyleTypes(styles: List<Style>) {
-        val baseStyles = styles.filter { it.isBaseStyle }
-        for (style in baseStyles) {
-            style.styleType = getStyleType(style.name)
-        }
-    }
-
-    /**
-     * @param type "styles" or "automatic-styles"
-     */
-    private fun getXmlStyles(type: String): List<Node> {
-        logger.trace { "Getting all styles of type '$type' defined in XML..." }
-
-        val nsOffice = officeNamespace
-        val nsStyle = styleNamespace
-
-        val xmlStyles = document!!.descendants(nsOffice, type)
-
-        val xmlStyles2 = mutableListOf<Node>()
-        for (xmlStyle in xmlStyles) {
-            val styleNodes = xmlStyle.childNodes.toMutableList()
-                .filter { it.localName == "style" }
-            xmlStyles2.addAll(styleNodes)
-        }
-
-        logger.trace { "Got ${xmlStyles2.size} styles of type '$type' defined in XML." }
-        return xmlStyles2
-    }
-
-    private fun getUserDefinedStyles(): List<Style> {
-        logger.trace { "Getting user defined styles..." }
-
-        val xmlUserDefinedStyles = getXmlStyles("styles")
-        val userDefinedStyles = xmlUserDefinedStyles.map {
-            val styleName =
-                it.attributes.getNamedItemNS(styleNamespace, "name").textContent
-            Style(styleName, true, null)
-        }
-
-        logger.trace { "Got ${userDefinedStyles.size} user defined styles." }
-        return userDefinedStyles
-    }
-
-    private fun getAutomaticGeneratedStyles(): List<Style> {
-        logger.trace { "Getting automatic generated styles..." }
-
-        val xmlAutomaticStyles = getXmlStyles("automatic-styles")
-        val automaticGeneratedStyles = xmlAutomaticStyles.map {
-            val styleName =
-                it.attributes.getNamedItemNS(styleNamespace, "name").textContent
-            val parentStyleName = it.attributes.getNamedItem("style:parent-style-name")?.textContent
-            Style(styleName, false, parentStyleName)
-        }
-
-        logger.trace { "Got ${automaticGeneratedStyles.size} automatic generated styles." }
-        return automaticGeneratedStyles
-    }
-
-    /**
-     * Finds and sets the base style for a automatic generated style.
-     */
-    private fun assignAutomaticGeneratedStyle(style: Style, styles: List<Style>) {
-        // style has no parent style; nothing to do
-        if (style.parentStyleName == null) {
-            return
-        }
-
-        // find the base style with the according name
-        val parentStyle = styles.firstOrNull { s ->
-            s.isBaseStyle && s.name == style.parentStyleName
-        }
-
-        if (parentStyle != null) {
-            style.parentStyle = parentStyle
-        } else {
-            // warn if some inconsistency was found
-            logger.warn("ParentStyle '${style.parentStyleName}' used by '${style.name}' not found (or is no base style).")
-        }
     }
 
     override fun loadDocument(file: File) {
