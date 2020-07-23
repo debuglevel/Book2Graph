@@ -78,7 +78,7 @@ class FodtStyleParser(private val document: XElement) : StyleParser() {
 
         val xmlStyles2 = mutableListOf<Node>()
         for (xmlStyle in xmlStyles) {
-            val styleNodes = xmlStyle.childNodes.asMutableList
+            val styleNodes = xmlStyle.childNodes.asList
                 .filter { it.localName == "style" }
             xmlStyles2.addAll(styleNodes)
         }

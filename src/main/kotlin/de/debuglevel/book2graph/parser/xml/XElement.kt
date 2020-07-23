@@ -27,6 +27,6 @@ class XElement {
 
     fun descendants(namespace: String, elementName: String): List<Node> {
         val nodeList = this.element?.getElementsByTagNameNS(namespace, elementName)!!
-        return nodeList.asMutableList
+        return nodeList.asList
     }
 }

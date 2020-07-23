@@ -101,11 +101,11 @@ object FodtParser : OdtParser() {
 
         val bodies = document!!.descendants(officeNamespace, "body")
         for (body in bodies) {
-            val textNodes = body.childNodes.asMutableList
+            val textNodes = body.childNodes.asList
                 .filter { it.localName == "text" }
 
             for (textNode in textNodes) {
-                val pNodes = textNode.childNodes.asMutableList
+                val pNodes = textNode.childNodes.asList
                     .filter { it.localName == "p" }
                 xmlParagraphs.addAll(pNodes)
             }
