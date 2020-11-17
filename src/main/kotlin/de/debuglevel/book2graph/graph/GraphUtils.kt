@@ -26,14 +26,14 @@ object GraphUtils {
                     .map { it.end }
             }
 
-        if (descendants.contains(breakingCondition)) {
-            return true
-        }
-
-        return descendants.any {
-            // ignoredEdge is replaced by null here, as it is only relevant in the first call level of the recursion
-                descendant ->
-            findVertex(descendant, breakingCondition, null)
+        return if (descendants.contains(breakingCondition)) {
+            true
+        } else {
+            descendants.any {
+                // ignoredEdge is replaced by null here, as it is only relevant in the first call level of the recursion
+                    descendant ->
+                findVertex(descendant, breakingCondition, null)
+            }
         }
     }
 }
