@@ -5,21 +5,6 @@ import mu.KotlinLogging
 object GraphUtils {
     private val logger = KotlinLogging.logger {}
 
-    /**
-     * Perform an transitive reduction on the graph. All edges which provide shortcuts by bypassing a vertex will be removed. A graph with as few edges as possible is the result.
-     * May stuck in a loop or throw an OverflowException if the graph is cyclic.
-     */
-    fun <T : Any> transitiveReduction(graph: Graph<T>) {
-        logger.debug { "Performing transitive reduction on graph..." }
-
-        for (edge in graph.getEdges()) {
-            if (pathExists(edge.start, edge.end, edge)) {
-                graph.removeEdge(edge)
-                logger.debug { "Removed superseded edge: $edge" }
-            }
-        }
-    }
-
     fun <T : Any> pathExists(start: Vertex<T>, end: Vertex<T>, ignoredEdge: Edge<Vertex<T>>) =
         findVertex(start, end, ignoredEdge)
 
