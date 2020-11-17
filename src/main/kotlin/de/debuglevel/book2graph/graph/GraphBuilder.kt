@@ -39,16 +39,16 @@ object GraphBuilder {
         }
 
         for (chapterVertex in chapterVertices) {
-            for (precedingChapterString in chapterVertex.vertex.precedingChapterReferences) {
+            for (precedingChapterString in chapterVertex.content.precedingChapterReferences) {
                 val precedingChapter = this.findChapterByTitle(chapters, precedingChapterString)
-                chapterVertices.firstOrNull { it.vertex == precedingChapter }?.let { precedingChapterVertex ->
+                chapterVertices.firstOrNull { it.content == precedingChapter }?.let { precedingChapterVertex ->
                     graph.addEdge(Edge(precedingChapterVertex, chapterVertex))
                 }
             }
 
-            for (succeedingChapterString in chapterVertex.vertex.succeedingChapterReferences) {
+            for (succeedingChapterString in chapterVertex.content.succeedingChapterReferences) {
                 val succeedingChapter = this.findChapterByTitle(chapters, succeedingChapterString)
-                chapterVertices.firstOrNull { it.vertex == succeedingChapter }?.let { succeedingChapterVertex ->
+                chapterVertices.firstOrNull { it.content == succeedingChapter }?.let { succeedingChapterVertex ->
                     graph.addEdge(Edge(chapterVertex, succeedingChapterVertex))
                 }
             }
