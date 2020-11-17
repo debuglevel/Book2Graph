@@ -39,4 +39,42 @@ object GraphUtils {
             }
         }
     }
+
+    fun <T : Any> getStartVertices(graph: Graph<T>): List<Vertex<T>> {
+        logger.trace { "Getting start vertices for graph..." }
+        val startVertices = graph.getVertices()
+            .flatMap { vertex -> getStartVertices(vertex) }
+            .distinct()
+        logger.trace { "Got ${startVertices.count()} start vertices for graph" }
+        return startVertices
+    }
+
+    fun <T : Any> getStartVertices(vertex: Vertex<T>): List<Vertex<T>> {
+        return if (vertex.inEdges.isEmpty()) {
+            listOf(vertex)
+        } else {
+            vertex.inEdges
+                .flatMap { edge -> getStartVertices(edge.start) }
+                .distinct()
+        }
+    }
+
+    fun <T : Any> getEndVertices(graph: Graph<T>): List<Vertex<T>> {
+        logger.trace { "Getting end vertices for graph..." }
+        val endVertices = graph.getVertices()
+            .flatMap { vertex -> getEndVertices(vertex) }
+            .distinct()
+        logger.trace { "Got ${endVertices.count()} end vertices for graph" }
+        return endVertices
+    }
+
+    fun <T : Any> getEndVertices(vertex: Vertex<T>): List<Vertex<T>> {
+        return if (vertex.outEdges.isEmpty()) {
+            listOf(vertex)
+        } else {
+            vertex.outEdges
+                .flatMap { edge -> getEndVertices(edge.start) }
+                .distinct()
+        }
+    }
 }
