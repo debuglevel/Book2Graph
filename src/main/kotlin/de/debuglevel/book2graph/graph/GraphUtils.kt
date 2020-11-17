@@ -12,11 +12,11 @@ object GraphUtils {
         findVertex(start, end, ignoredEdge)
 
     /**
-     * Walk tree (starting from "start") to find vertex "breakingCondition".
+     * Walk tree (starting from "start") to find vertex "breakCondition".
      */
     private fun <T : Any> findVertex(
         start: Vertex<T>,
-        breakingCondition: Vertex<T>,
+        breakCondition: Vertex<T>,
         ignoredEdge: Edge<T>?
     ): Boolean {
         val descendants =
@@ -29,13 +29,13 @@ object GraphUtils {
                     .map { it.end }
             }
 
-        return if (descendants.contains(breakingCondition)) {
+        return if (descendants.contains(breakCondition)) {
             true
         } else {
             descendants.any {
                 // ignoredEdge is replaced by null here, as it is only relevant in the first call level of the recursion
                     descendant ->
-                findVertex(descendant, breakingCondition, null)
+                findVertex(descendant, breakCondition, null)
             }
         }
     }
