@@ -17,17 +17,17 @@ object GraphBuilder {
         val graph = Graph<Chapter>()
 
         val chapterVertices = chapters.map { chapter ->
-            val color = when {
-                chapter.revisionStatus == RevisionStatus.Good -> Color.Green
-                chapter.revisionStatus == RevisionStatus.Improvable -> Color.Red
-                chapter.revisionStatus == RevisionStatus.NotReviewed -> Color.Yellow
-                chapter.revisionStatus == RevisionStatus.Milestone -> Color.Blue
-                chapter.revisionStatus == RevisionStatus.Unknown -> Color.Gray
+            val color = when (chapter.revisionStatus) {
+                RevisionStatus.Good -> Color.Green
+                RevisionStatus.Improvable -> Color.Red
+                RevisionStatus.NotReviewed -> Color.Yellow
+                RevisionStatus.Milestone -> Color.Blue
+                RevisionStatus.Unknown -> Color.Gray
                 else -> Color.Gray
             }
 
-            val shape = when {
-                chapter.revisionStatus == RevisionStatus.Milestone -> Shape.Rectangle
+            val shape = when (chapter.revisionStatus) {
+                RevisionStatus.Milestone -> Shape.Rectangle
                 else -> Shape.Ellipse
             }
 
