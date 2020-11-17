@@ -8,11 +8,8 @@ class Graph<T : Any> {
     private val vertices = mutableSetOf<Vertex<T>>()
     private val edges = mutableSetOf<Edge<Vertex<T>>>()
 
-    fun addVertex(obj: T, color: Color, shape: Shape, tooltip: String): Vertex<T> {
-        val vertex = Vertex(obj, color, shape, tooltip)
+    fun addVertex(vertex: Vertex<T>) {
         vertices.add(vertex)
-
-        return vertex
     }
 
     fun addEdge(edge: Edge<Vertex<T>>) {

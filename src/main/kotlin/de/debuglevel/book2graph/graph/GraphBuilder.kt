@@ -33,7 +33,9 @@ object GraphBuilder {
 
             val tooltip = chapter.summaryAsString.replace("\n", "&#10;")
 
-            graph.addVertex(chapter, color, shape, tooltip)
+            val vertex = Vertex(chapter, color, shape, tooltip)
+            graph.addVertex(vertex)
+            vertex
         }
 
         for (chapterVertex in chapterVertices) {
