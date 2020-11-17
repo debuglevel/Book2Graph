@@ -56,7 +56,7 @@ object GraphBuilder {
         }
 
         if (transitiveReduction) {
-            val time = measureTimeMillis { transitiveReduction(graph) }
+            val time = measureTimeMillis { GraphUtils.transitiveReduction(graph) }
             logger.debug { "Removing superseded edges took ${time}ms" }
         }
 
@@ -66,57 +66,6 @@ object GraphBuilder {
 
     private fun findChapterByTitle(chapters: List<Chapter>, chapterTitle: String): Chapter? {
         return chapters.firstOrNull { c -> c.title == chapterTitle }
-    }
-
-    /**
-     * Perform an transitive reduction on the graph. All edges which provide shortcuts by bypassing a vertex will be removed. A graph with as few edges as possible is the result.
-     * May stuck in a loop or throw an OverflowException if the graph is cyclic.
-     */
-    private fun transitiveReduction(graph: Graph<Chapter>) {
-        logger.debug { "Performing transitive reduction on graph..." }
-
-        for (edge in graph.getEdges()) {
-            if (pathExists(edge.start, edge.end, edge)) {
-                graph.removeEdge(edge)
-                logger.debug { "Removed superseded edge: $edge" }
-            }
-        }
-    }
-
-    private fun pathExists(start: Vertex<Chapter>, end: Vertex<Chapter>, ignoredEdge: Edge<Vertex<Chapter>>): Boolean {
-        return findVertex(start, end, ignoredEdge)
-    }
-
-    /**
-     * Walk tree (starting from "start") to find vertex "breakingCondition".
-     */
-    private fun findVertex(
-        start: Vertex<Chapter>,
-        breakingCondition: Vertex<Chapter>,
-        ignoredEdge: Edge<Vertex<Chapter>>?
-    ): Boolean {
-        val descendants =
-            when {
-                // only filter if ignoredEdge is not null (i.e. we are on the first level of the recursive tree). Saved about 50% time.
-                ignoredEdge != null -> start.outEdges
-                    .filter { it !== ignoredEdge }
-                    .map { it.end }
-                else -> start.outEdges
-                    .map { it.end }
-            }
-
-        if (descendants.contains(breakingCondition)) {
-            return true
-        }
-
-        for (descendant in descendants) {
-            // ignoredEdge is replaced by null here, as it is only relevant in the first call level of the recursion
-            if (findVertex(descendant, breakingCondition, null)) {
-                return true
-            }
-        }
-
-        return false
     }
 }
 
