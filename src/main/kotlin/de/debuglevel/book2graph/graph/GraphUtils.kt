@@ -30,13 +30,10 @@ object GraphUtils {
             return true
         }
 
-        for (descendant in descendants) {
+        return descendants.any {
             // ignoredEdge is replaced by null here, as it is only relevant in the first call level of the recursion
-            if (findVertex(descendant, breakingCondition, null)) {
-                return true
-            }
+                descendant ->
+            findVertex(descendant, breakingCondition, null)
         }
-
-        return false
     }
 }
