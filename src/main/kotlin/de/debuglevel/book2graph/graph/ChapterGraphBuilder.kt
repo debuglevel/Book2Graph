@@ -5,7 +5,7 @@ import de.debuglevel.book2graph.book.RevisionStatus
 import mu.KotlinLogging
 import kotlin.system.measureTimeMillis
 
-object GraphBuilder {
+object ChapterGraphBuilder {
     private val logger = KotlinLogging.logger {}
 
     fun build(
