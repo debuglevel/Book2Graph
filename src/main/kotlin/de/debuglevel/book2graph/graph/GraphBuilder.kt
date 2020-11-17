@@ -16,8 +16,7 @@ object GraphBuilder {
 
         val graph = Graph<Chapter>()
 
-        val chapterVertices = mutableListOf<Vertex<Chapter>>()
-        for (chapter in chapters) {
+        val chapterVertices = chapters.map { chapter ->
             val color = when {
                 chapter.revisionStatus == RevisionStatus.Good -> Color.Green
                 chapter.revisionStatus == RevisionStatus.Improvable -> Color.Red
@@ -34,7 +33,7 @@ object GraphBuilder {
 
             val tooltip = chapter.summaryAsString.replace("\n", "&#10;")
 
-            chapterVertices.add(graph.addVertex(chapter, color, shape, tooltip))
+            graph.addVertex(chapter, color, shape, tooltip)
         }
 
         for (chapterVertex in chapterVertices) {
