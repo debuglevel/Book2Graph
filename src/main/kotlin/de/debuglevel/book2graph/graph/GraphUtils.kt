@@ -5,7 +5,7 @@ import mu.KotlinLogging
 object GraphUtils {
     private val logger = KotlinLogging.logger {}
 
-    fun <T : Any> pathExists(start: Vertex<T>, end: Vertex<T>, ignoredEdge: Edge<Vertex<T>>) =
+    fun <T : Any> pathExists(start: Vertex<T>, end: Vertex<T>, ignoredEdge: Edge<T>) =
         findVertex(start, end, ignoredEdge)
 
     /**
@@ -14,7 +14,7 @@ object GraphUtils {
     private fun <T : Any> findVertex(
         start: Vertex<T>,
         breakingCondition: Vertex<T>,
-        ignoredEdge: Edge<Vertex<T>>?
+        ignoredEdge: Edge<T>?
     ): Boolean {
         val descendants =
             when {

@@ -6,25 +6,25 @@ class Graph<T : Any> {
     private val logger = KotlinLogging.logger {}
 
     private val vertices = mutableSetOf<Vertex<T>>()
-    private val edges = mutableSetOf<Edge<Vertex<T>>>()
+    private val edges = mutableSetOf<Edge<T>>()
 
     fun addVertex(vertex: Vertex<T>) {
         vertices.add(vertex)
     }
 
-    fun addEdge(edge: Edge<Vertex<T>>) {
+    fun addEdge(edge: Edge<T>) {
         edges.add(edge)
         edge.start.outEdges.add(edge)
         edge.end.inEdges.add(edge)
     }
 
-    fun removeEdge(edge: Edge<Vertex<T>>) {
+    fun removeEdge(edge: Edge<T>) {
         edges.remove(edge)
         edge.start.outEdges.remove(edge)
         edge.end.inEdges.remove(edge)
     }
 
-    fun getEdges(): Set<Edge<Vertex<T>>> {
+    fun getEdges(): Set<Edge<T>> {
         return edges.toSet()
     }
 
