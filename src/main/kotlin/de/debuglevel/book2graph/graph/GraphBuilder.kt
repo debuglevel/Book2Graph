@@ -64,7 +64,7 @@ object GraphBuilder {
     }
 
     private fun findChapterByTitle(chapters: List<Chapter>, chapterTitle: String): Chapter? {
-        return chapters.firstOrNull { c -> c.title == chapterTitle }
+        return chapters.firstOrNull { it.title == chapterTitle }
     }
 }
 
