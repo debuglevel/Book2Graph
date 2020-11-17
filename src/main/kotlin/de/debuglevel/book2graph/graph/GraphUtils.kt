@@ -18,7 +18,7 @@ object GraphUtils {
     ): Boolean {
         val descendants =
             when {
-                // only filter if ignoredEdge is not null (i.e. we are on the first level of the recursive tree). Saved about 50% time.
+                // only filter if ignoredEdge is not null (i.e. we are on the first level of the recursive tree). Saves about 50% time.
                 ignoredEdge != null -> start.outEdges
                     .filter { it !== ignoredEdge }
                     .map { it.end }
