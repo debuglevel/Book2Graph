@@ -1,6 +1,5 @@
 package de.debuglevel.book2graph.graph
 
-import de.debuglevel.book2graph.book.Chapter
 import mu.KotlinLogging
 
 object GraphUtils {
@@ -10,7 +9,7 @@ object GraphUtils {
      * Perform an transitive reduction on the graph. All edges which provide shortcuts by bypassing a vertex will be removed. A graph with as few edges as possible is the result.
      * May stuck in a loop or throw an OverflowException if the graph is cyclic.
      */
-    fun transitiveReduction(graph: Graph<Chapter>) {
+    fun <T : Any> transitiveReduction(graph: Graph<T>) {
         logger.debug { "Performing transitive reduction on graph..." }
 
         for (edge in graph.getEdges()) {
@@ -21,16 +20,16 @@ object GraphUtils {
         }
     }
 
-    fun pathExists(start: Vertex<Chapter>, end: Vertex<Chapter>, ignoredEdge: Edge<Vertex<Chapter>>) =
+    fun <T : Any> pathExists(start: Vertex<T>, end: Vertex<T>, ignoredEdge: Edge<Vertex<T>>) =
         findVertex(start, end, ignoredEdge)
 
     /**
      * Walk tree (starting from "start") to find vertex "breakingCondition".
      */
-    private fun findVertex(
-        start: Vertex<Chapter>,
-        breakingCondition: Vertex<Chapter>,
-        ignoredEdge: Edge<Vertex<Chapter>>?
+    private fun <T : Any> findVertex(
+        start: Vertex<T>,
+        breakingCondition: Vertex<T>,
+        ignoredEdge: Edge<Vertex<T>>?
     ): Boolean {
         val descendants =
             when {
