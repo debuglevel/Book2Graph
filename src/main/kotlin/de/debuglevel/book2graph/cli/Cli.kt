@@ -5,7 +5,9 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
-import de.debuglevel.book2graph.graph.ChapterGraphBuilder
+import de.debuglevel.book2graph.book.Chapter
+import de.debuglevel.book2graph.graph.ChapterNodeInformationRetriever
+import de.debuglevel.book2graph.graph.GraphBuilder
 import de.debuglevel.book2graph.graph.export.DotExporter
 import de.debuglevel.book2graph.graph.export.GraphvizExporter
 import de.debuglevel.book2graph.parser.FodtParser
@@ -44,7 +46,7 @@ class Cli : CliktCommand() {
         logger.info { "Starting Book2Graph..." }
 
         val book = FodtParser.parse(fodtFile)
-        val graph = ChapterGraphBuilder.build(book.chapters, transitiveReduction)
+        val graph = GraphBuilder<Chapter>(ChapterNodeInformationRetriever()).build(book.chapters, transitiveReduction)
         val dot = DotExporter.generate(graph)
         GraphvizExporter.render(dot, svgFile, Format.SVG)
     }
