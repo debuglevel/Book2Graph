@@ -32,12 +32,15 @@ class Graph<T : Any> {
         return vertices.toSet()
     }
 
-    fun print() {
-        for (vertex in vertices) {
-            println(vertex.toString())
+    override fun toString(): String {
+        var s = ""
+        vertices.map { vertex ->
+            s += vertex.toString()
             edges
                 .filter { e -> e.start == vertex }
-                .forEach { e -> println("  ${e.end}") }
+                .forEach { e -> s += "  ${e.end}" }
+            s
         }
+        return s
     }
 }
