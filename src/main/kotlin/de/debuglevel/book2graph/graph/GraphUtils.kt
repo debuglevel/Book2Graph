@@ -5,6 +5,9 @@ import mu.KotlinLogging
 object GraphUtils {
     private val logger = KotlinLogging.logger {}
 
+    /**
+     * Whether another path between start and end (other than the given ignoredEdge) exists.
+     */
     fun <T : Any> pathExists(start: Vertex<T>, end: Vertex<T>, ignoredEdge: Edge<T>) =
         findVertex(start, end, ignoredEdge)
 
