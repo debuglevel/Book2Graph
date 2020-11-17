@@ -56,8 +56,8 @@ object GraphBuilder {
         }
 
         if (transitiveReduction) {
-            val time = measureTimeMillis { GraphUtils.transitiveReduction(graph) }
-            logger.debug { "Removing superseded edges took ${time}ms" }
+            val duration = measureTimeMillis { GraphUtils.transitiveReduction(graph) }
+            logger.debug { "Removing superseded edges took ${duration}ms" }
         }
 
         logger.debug { "Creating graph done." }
