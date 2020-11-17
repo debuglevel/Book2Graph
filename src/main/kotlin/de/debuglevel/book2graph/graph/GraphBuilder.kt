@@ -59,7 +59,7 @@ object GraphBuilder {
             logger.debug { "Removing superseded edges took ${duration}ms" }
         }
 
-        logger.debug { "Creating graph done." }
+        logger.debug { "Created graph" }
         return graph
     }
 
