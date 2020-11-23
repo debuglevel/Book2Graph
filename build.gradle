@@ -37,6 +37,12 @@ mainClassName = 'de.debuglevel.book2graph.cli.CliKt'
 
 repositories {
     jcenter()
+    maven {
+        url 'https://jitpack.io'
+        metadataSources { // TODO: remove this as soon as a release of java-graph-library exists
+            artifact() // workaround to specify git hash as jitpack version
+        }
+    }
 }
 
 dependencies {
@@ -64,6 +70,9 @@ dependencies {
 
     // Clikt
     implementation 'com.github.ajalt:clikt:2.1.0'
+
+    // Graph Library
+    implementation 'com.github.debuglevel:java-graph-library:main-8383020ec0-1' // TODO: replace by release once it is available
 }
 
 // Java configuration

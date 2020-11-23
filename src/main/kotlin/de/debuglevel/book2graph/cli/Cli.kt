@@ -7,10 +7,10 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import de.debuglevel.book2graph.book.Chapter
 import de.debuglevel.book2graph.graph.ChapterNodeInformationRetriever
-import de.debuglevel.book2graph.graph.GraphBuilder
-import de.debuglevel.book2graph.graph.export.DotExporter
-import de.debuglevel.book2graph.graph.export.GraphvizExporter
 import de.debuglevel.book2graph.parser.FodtParser
+import de.debuglevel.graphlibrary.GraphBuilder
+import de.debuglevel.graphlibrary.export.DotExporter
+import de.debuglevel.graphlibrary.export.GraphvizExporter
 import guru.nidi.graphviz.engine.Format
 import mu.KotlinLogging
 import java.io.File

@@ -2,6 +2,10 @@ package de.debuglevel.book2graph.graph
 
 import de.debuglevel.book2graph.book.Chapter
 import de.debuglevel.book2graph.book.RevisionStatus
+import de.debuglevel.graphlibrary.Color
+import de.debuglevel.graphlibrary.NodeInformationRetriever
+import de.debuglevel.graphlibrary.Shape
+import de.debuglevel.graphlibrary.Vertex
 import mu.KotlinLogging
 
 class ChapterNodeInformationRetriever : NodeInformationRetriever<Chapter> {
